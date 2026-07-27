@@ -1,0 +1,159 @@
+export const API_BASE_URL = "http://localhost:8000/api";
+
+export interface ExtractedSample {
+  customer_name?: string;
+  material_code?: string;
+  sample_description?: string;
+  test_total_aa: boolean;
+  test_supp_aa: boolean;
+  test_nir: boolean;
+  test_trp: boolean;
+  test_gaa: boolean;
+}
+
+export interface ExtractedBatch {
+  customer_name?: string;
+  samples: ExtractedSample[];
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface Sample {
+  id: string;
+  batch_id: string;
+  material_code: string;
+  sample_description: string;
+  test_total_aa: boolean;
+  test_supp_aa: boolean;
+  test_nir: boolean;
+  test_trp: boolean;
+  test_gaa: boolean;
+  created_at: string;
+}
+
+export interface SubmissionBatch {
+  id: string;
+  customer_id: string;
+  status: string;
+  manifest_qr_code?: string;
+  created_at: string;
+  customer?: Customer;
+  samples?: Sample[];
+}
+
+export const api = {
+  async processAudio(file: File): Promise<ExtractedBatch> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${API_BASE_URL}/ai/process-audio`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.detail || "Failed to process audio with AI");
+    }
+
+    return response.json();
+  },
+
+  async processPhoto(file: File): Promise<ExtractedBatch> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${API_BASE_URL}/ai/process-photo`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.detail || "Failed to process photo with AI");
+    }
+
+    return response.json();
+  },
+
+  async createBatch(customerName: string, samples: Omit<Sample, "id" | "batch_id" | "created_at">[]): Promise<SubmissionBatch> {
+    const response = await fetch(`${API_BASE_URL}/batches/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customer_name: customerName,
+        samples,
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.detail || "Failed to create draft batch");
+    }
+
+    return response.json();
+  },
+
+  async getBatch(batchId: string): Promise<SubmissionBatch> {
+    const response = await fetch(`${API_BASE_URL}/batches/${batchId}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch batch details");
+    }
+    return response.json();
+  },
+
+  async updateBatch(batchId: string, customerName: string, samples: any[]): Promise<SubmissionBatch> {
+    const response = await fetch(`${API_BASE_URL}/batches/${batchId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customer_name: customerName,
+        samples: samples.map(s => ({
+          material_code: s.material_code,
+          sample_description: s.sample_description,
+          test_total_aa: s.test_total_aa,
+          test_supp_aa: s.test_supp_aa,
+          test_nir: s.test_nir,
+          test_trp: s.test_trp,
+          test_gaa: s.test_gaa,
+        })),
+      }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.detail || "Failed to update batch");
+    }
+
+    return response.json();
+  },
+
+  async submitBatch(batchId: string): Promise<SubmissionBatch> {
+    const response = await fetch(`${API_BASE_URL}/batches/${batchId}/submit`, {
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      // If there are detailed validation errors:
+      if (errData.detail && typeof errData.detail === "object" && errData.detail.errors) {
+        throw new Error(JSON.stringify(errData.detail.errors));
+      }
+      throw new Error(errData.detail?.message || errData.detail || "Failed to finalize batch submission");
+    }
+
+    return response.json();
+  },
+
+  getExportUrl(batchId: string): string {
+    return `${API_BASE_URL}/batches/${batchId}/export`;
+  }
+};

@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+:root {
+  --foreground-rgb: 15, 23, 42; /* slate-900 */
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 248, 250, 252; /* slate-50 */
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    )
+    no-repeat;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Glassmorphism utility card - adjusted for light theme */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.glass-panel-glow {
+  box-shadow: 0 8px 32px 0 rgba(139, 92, 246, 0.06);
+}
+
+/* Text overrides to convert dark-mode helpers into readable light-mode styles */
+.text-slate-100 {
+  color: #0f172a !important; /* slate-900 */
+}
+.text-slate-200 {
+  color: #1e293b !important; /* slate-800 */
+}
+.text-slate-300 {
+  color: #334155 !important; /* slate-700 */
+}
+.text-slate-400 {
+  color: #475569 !important; /* slate-600 */
+}
+.text-slate-500 {
+  color: #64748b !important; /* slate-500 */
+}
+.text-brand-300 {
+  color: #6d28d9 !important; /* brand-700 */
+}
+
+/* Input Fields */
+input[type="text"] {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #0f172a !important;
+}
+input[type="text"]:focus {
+  border-color: #8b5cf6 !important; /* brand-500 */
+  background-color: #ffffff !important;
+}
+
+/* Override tailwind gradients starting from white */
+.from-white {
+  --tw-gradient-from: #0f172a !important;
+  --tw-gradient-to: rgba(124, 58, 237, 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #1e293b var(--tw-gradient-via-position), #7c3aed !important;
+}
+
+/* Badges and Background overlays */
+.bg-brand-500\/10 {
+  background-color: rgba(139, 92, 246, 0.08) !important;
+}
+.text-purple-400 {
+  color: #6d28d9 !important; /* brand-700 */
+}
+.bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+.hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+.hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+.border-white\/10, .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+.bg-slate-950\/80 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+.bg-slate-950\/60 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+.bg-slate-900\/60 {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Custom AG Grid Light Theme overrides to match light glassmorphism */
+.ag-theme-quartz-dark {
+  --ag-background-color: rgba(255, 255, 255, 0.85) !important;
+  --ag-header-background-color: rgba(241, 245, 249, 0.9) !important;
+  --ag-border-color: rgba(0, 0, 0, 0.08) !important;
+  --ag-row-border-color: rgba(0, 0, 0, 0.04) !important;
+  --ag-selected-row-background-color: rgba(139, 92, 246, 0.15) !important;
+  --ag-row-hover-color: rgba(139, 92, 246, 0.05) !important;
+  --ag-foreground-color: #0f172a !important;
+  --ag-header-foreground-color: #475569 !important;
+  --ag-font-family: inherit;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.4);
+}
