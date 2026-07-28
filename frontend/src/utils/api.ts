@@ -59,51 +59,72 @@ export const api = {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(`${API_BASE_URL}/ai/process-audio`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/ai/process-audio`, {
+        method: "POST",
+        body: formData,
+      });
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.detail || "Failed to process audio with AI");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || "Failed to process audio with AI");
+      }
+
+      return response.json();
+    } catch (err: any) {
+      if (err.name === "TypeError" && err.message.includes("fetch")) {
+        throw new Error(`Failed to fetch from backend at (${API_BASE_URL}). Please verify your backend URL is HTTPS and active on Render.`);
+      }
+      throw err;
     }
-
-    return response.json();
   },
 
   async processPhoto(file: File): Promise<ExtractedBatch> {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch(`${API_BASE_URL}/ai/process-photo`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/ai/process-photo`, {
+        method: "POST",
+        body: formData,
+      });
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.detail || "Failed to process photo with AI");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || "Failed to process photo with AI");
+      }
+
+      return response.json();
+    } catch (err: any) {
+      if (err.name === "TypeError" && err.message.includes("fetch")) {
+        throw new Error(`Failed to fetch from backend at (${API_BASE_URL}). Please verify your backend URL is HTTPS and active on Render.`);
+      }
+      throw err;
     }
-
-    return response.json();
   },
 
   async processText(text: string): Promise<ExtractedBatch> {
-    const response = await fetch(`${API_BASE_URL}/ai/process-text`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text }),
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/ai/process-text`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.detail || "Failed to process text with AI");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || "Failed to process text with AI");
+      }
+
+      return response.json();
+    } catch (err: any) {
+      if (err.name === "TypeError" && err.message.includes("fetch")) {
+        throw new Error(`Failed to fetch from backend at (${API_BASE_URL}). Please verify backend URL is active & HTTPS on Render.`);
+      }
+      throw err;
     }
-
-    return response.json();
   },
 
   async createBatch(customerName: string, customerMacNo: string, samples: Omit<Sample, "id" | "batch_id" | "created_at">[]): Promise<SubmissionBatch> {
