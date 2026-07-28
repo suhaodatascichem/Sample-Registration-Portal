@@ -28,23 +28,40 @@ This document records the current status of the **Lab Sample Intake Portal** pro
 *   **LLM Range Expansion Prompt Rules**: Enhanced `ai_service.py` system prompt to instruct LLMs to expand shorthand sample counts and ranges (e.g., *"4 broiler grower feed samples... 1001 to 1004"*) into individual sample items.
 *   **Dashboard Layout Realignment**: Re-architected `page.tsx` grid layout: Text Intake placed prominently in a large left-side window (`lg:col-span-7`), with Voice Intake and Photo Scanner stacked vertically on the right (`lg:col-span-5`).
 
+### 🤖 5. Google Gemini SDK Migration (`google-genai`)
+* **SDK Upgrade**: Migrated backend AI services from OpenAI to official Google GenAI SDK (`google-genai`).
+* **Model Selection**: Standardized on model **`gemini-flash-latest`** with fallback to `gemini-2.0-flash`.
+* **Structured JSON Extraction**: Enforces Pydantic schema validation for text notes, audio transcription, and image vision OCR.
+
+### 📊 6. Custom Columns & Grid Extensions
+* **Header Inputs**: Added `Customer Mac. no` input field in the top header bar alongside `Submitter Name`.
+* **Table Columns**:
+  * Added **`Mac. no`** as the first column in front of the table in `SampleGrid.tsx`.
+  * Added **`Contact Person`** as the last column at the end of the table representing lab personnel.
+* **LIMS CSV Export**: Updated `export_service.py` to export `MacNo` and `ContactPerson` fields into generated CSV files.
+
+### 🌐 7. Cloud Deployment & Tunnel Sharing (`share.bat` & Render.com)
+* **`share.bat` Script**: Added 1-click cloud tunnel script using `localtunnel` bound to IPv4 (`127.0.0.1:3000`) for instant public link generation without cloud accounts.
+* **Render Blueprint (`render.yaml`)**: Created automated Blueprint deployment specification for Render.com.
+* **Deployment Guide (`deployment_guide.md`)**: Comprehensive documentation covering local tunnel sharing, Render manual setup (No credit card required), Render Blueprint setup, Vercel + Supabase, and Docker VPS hosting.
+
 ---
 
 ## 🛰️ Git Repository Status
 
-*   **Repository Location**: `d:\Data\AI-projects\sample-registration-portal`
-*   **Ignored Files (via `.gitignore`)**:
-    *   Python virtual environments (`backend/.venv/`, `backend/.pytest_cache/`, `*.pyc`)
-    *   Sensitive credentials (`backend/.env`)
-    *   Node/Next modules and caches (`frontend/node_modules/`, `frontend/.next/`)
-*   **GitHub Remote**: `https://github.com/suhaodatascichem/Sample-Registration-Portal`
-*   **Main Branch**: `main` (tracked with `origin/main`)
+* **Repository Location**: `c:\AI project\Sample Registration Portal\Sample-Registration-Portal`
+* **Ignored Files (via `.gitignore`)**:
+    * Python virtual environments (`backend/.venv/`, `backend/.pytest_cache/`, `*.pyc`)
+    * Sensitive credentials (`backend/.env`)
+    * Node/Next modules and caches (`frontend/node_modules/`, `frontend/.next/`)
+* **GitHub Remote**: `https://github.com/suhaodatascichem/Sample-Registration-Portal`
+* **Main Branch**: `main` (tracked with `origin/main`)
 
 ---
 
 ## 🏃 Run State
 
-*   **Database**: PostgreSQL runs inside Docker container `lab-postgres` mapping container port `5432` to host port `5433` (as defined in `start.bat`).
-*   **FastAPI Backend**: Runs on `http://localhost:8000`.
-*   **Next.js Frontend**: Runs on `http://localhost:3000`.
-*   **AI Mode**: Active in **Mock Mode** by default. Set `OPENAI_API_KEY` in `backend/.env` to switch to live OpenAI parsing.
+* **Database**: PostgreSQL runs inside Docker container `lab-postgres` mapping container port `5432` to host port `5433` locally, or managed PostgreSQL on Render.
+* **FastAPI Backend**: Runs on `http://localhost:8000` locally, or `https://sample-registration-portal.onrender.com` on Render.
+* **Next.js Frontend**: Runs on `http://localhost:3000` locally, or `https://sample-portal-frontend.onrender.com` on Render.
+* **AI Mode**: Active via **Google Gemini API** (`GEMINI_API_KEY`) using model `gemini-flash-latest`.

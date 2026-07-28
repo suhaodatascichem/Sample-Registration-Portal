@@ -36,20 +36,22 @@ Ensure you have the following installed on your PC:
 ### 2. Run the Application
 1. Double-click the **`start.bat`** script in the project root folder.
 2. The script is portable and self-healing. It will automatically:
-    *   Detect and configure Node.js and Python environments on any PC.
-    *   Create Python `.venv` and install `pip` & `npm` dependencies automatically if missing.
-    *   Start/create the PostgreSQL container (`lab-postgres`) on port `5433`.
-    *   Launch the FastAPI backend service (`http://localhost:8000`) and Next.js frontend dev server (`http://localhost:3000`) in side-by-side command windows.
+    * Detect and configure Node.js and Python environments on any PC.
+    * Create Python `.venv` and install `pip` & `npm` dependencies automatically if missing.
+    * Start/create the PostgreSQL container (`lab-postgres`) on port `5433`.
+    * Launch the FastAPI backend service (`http://localhost:8000`) and Next.js frontend dev server (`http://localhost:3000`) in side-by-side command windows.
 3. Open your browser and navigate to: **`http://localhost:3000`**
 
-### 3. API Key Configuration (Optional)
-The system is configured to run in **Mock Mode** if no API key is present:
-*   **Mock Mode (Default)**: You can upload dummy audio or image files, and the app will generate mock sample extractions so you can try all visual flows without paying for API calls.
-*   **Production AI Mode**: To use real AI parsing, add your OpenAI API key to the `backend/.env` file:
+### 3. Share & Cloud Deployment Options
+* 🚀 **Instant 1-Click Demo Sharing (`share.bat`)**: Double-click `share.bat` to generate a free shareable HTTPS URL (`https://...loca.lt`) in 1 minute to show your boss or team.
+* 🌐 **24/7 Cloud Deployment (Render.com)**: Refer to [deployment_guide.md](file:///c:/AI%20project/Sample%20Registration%20Portal/Sample-Registration-Portal/deployment_guide.md) for step-by-step instructions to deploy your frontend, backend, and PostgreSQL database to Render.com (No credit card required).
+
+### 4. API Key Configuration
+* **Mock Mode (Default)**: If no API key is present, mock extractions will run for testing.
+* **Production Google Gemini Mode**: Add your Google Gemini API key to `backend/.env`:
     ```env
-    OPENAI_API_KEY=sk-proj-...
+    GEMINI_API_KEY=AIzaSy...
     ```
-    Then restart the backend service.
 
 ---
 
