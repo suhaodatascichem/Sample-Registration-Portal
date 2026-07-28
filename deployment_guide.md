@@ -71,7 +71,7 @@ Deploy the database, backend, and frontend to **Render.com** for a permanent `ht
    * **Root Directory**: `backend`
    * **Environment**: `Python 3`
    * **Build Command**: `pip install -r requirements.txt`
-   * **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+   * **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 4. Add **Environment Variables**:
    * `DATABASE_URL`: *(Paste the PostgreSQL URL from Step 1)*
    * `GEMINI_API_KEY`: *(Paste your Google Gemini API key)*
