@@ -87,7 +87,7 @@ Deploy the database, backend, and frontend to **Render.com** for a permanent `ht
    * **Root Directory**: `frontend`
    * **Environment**: `Node`
    * **Build Command**: `npm install && npm run build`
-   * **Start Command**: `npm run start`
+   * **Start Command**: `npx next start -p $PORT`
 4. Add **Environment Variable**:
    * `NEXT_PUBLIC_API_URL`: `https://sample-portal-backend.onrender.com/api`
 5. Click **Create Web Service**.
