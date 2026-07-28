@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     google_api_key: str = ""
     openai_api_key: str = ""
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = ["*"]
 
     class Config:
         env_file = ".env"
