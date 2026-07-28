@@ -58,6 +58,11 @@ async def process_photo(file: UploadFile = File(...)):
             if os.path.exists(temp_path):
                 os.remove(temp_path)
                 
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error parsing photo with AI: {str(e)}"
+        )
 @router.post("/process-text", response_model=ExtractedBatch)
 async def process_text(input_data: TextInput):
     if not input_data.text or not input_data.text.strip():
