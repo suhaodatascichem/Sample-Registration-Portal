@@ -12,7 +12,8 @@ import { api, ExtractedBatch } from "@/utils/api";
 export default function IntakeDashboard() {
   const router = useRouter();
   
-  const [customerName, setCustomerName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [submitterName, setSubmitterName] = useState("");
   const [customerMacNo, setCustomerMacNo] = useState("");
   const [rowData, setRowData] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -22,7 +23,7 @@ export default function IntakeDashboard() {
   const handleAIExtraction = (data: ExtractedBatch) => {
     setErrorMsg(null);
     if (data.customer_name) {
-      setCustomerName(data.customer_name);
+      setCompanyName(data.customer_name);
     }
     if (data.customer_mac_no) {
       setCustomerMacNo(data.customer_mac_no);
@@ -31,7 +32,7 @@ export default function IntakeDashboard() {
     // Convert extracted samples into row data format
     const newRows = data.samples.map((s) => ({
       mac_no: s.mac_no || data.customer_mac_no || customerMacNo || "",
-      customer_name: s.customer_name || data.customer_name || customerName || "",
+      customer_name: s.customer_name || data.customer_name || companyName || "",
       material_code: s.material_code || "OTHER",
       sample_description: s.sample_description || "",
       test_total_aa: s.test_total_aa,
@@ -39,7 +40,7 @@ export default function IntakeDashboard() {
       test_nir: s.test_nir,
       test_trp: s.test_trp,
       test_gaa: s.test_gaa,
-      contact_person: s.contact_person || "Sheila"
+      contact_person: s.contact_person || submitterName || "Sheila"
     }));
 
     // Append to existing rows
@@ -51,8 +52,8 @@ export default function IntakeDashboard() {
   };
 
   const handleSaveDraft = async () => {
-    if (!customerName.trim()) {
-      setErrorMsg("Please enter a submitter name to create a batch.");
+    if (!companyName.trim()) {
+      setErrorMsg("Please enter a company / customer name to create a batch.");
       return;
     }
     if (rowData.length === 0) {
@@ -73,11 +74,11 @@ export default function IntakeDashboard() {
         test_nir: !!row.test_nir,
         test_trp: !!row.test_trp,
         test_gaa: !!row.test_gaa,
-        contact_person: row.contact_person || "Sheila"
+        contact_person: row.contact_person || submitterName || "Sheila"
       }));
 
       // 2. Call backend draft batch creation API
-      const batch = await api.createBatch(customerName, customerMacNo, samplesPayload);
+      const batch = await api.createBatch(companyName, customerMacNo, submitterName, samplesPayload);
       
       // 3. Route to the review page
       router.push(`/review?batch_id=${batch.id}`);
@@ -102,21 +103,34 @@ export default function IntakeDashboard() {
         </div>
         
         {/* Customer & Mac No Inputs */}
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <div className="flex flex-col gap-1.5 min-w-[200px] w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-1.5 min-w-[180px] w-full sm:w-auto">
             <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Submitter Name
+              Company Name
             </label>
             <input
               type="text"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
               placeholder="e.g. Smith Farms Ltd"
               className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all shadow-inner"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5 min-w-[180px] w-full sm:w-auto">
+          <div className="flex flex-col gap-1.5 min-w-[160px] w-full sm:w-auto">
+            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              Submitter Name
+            </label>
+            <input
+              type="text"
+              value={submitterName}
+              onChange={(e) => setSubmitterName(e.target.value)}
+              placeholder="e.g. John Doe"
+              className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all shadow-inner"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5 min-w-[160px] w-full sm:w-auto">
             <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
               Customer Mac. no
             </label>

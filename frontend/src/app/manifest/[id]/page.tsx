@@ -81,7 +81,7 @@ export default function ShippingManifest() {
         <div className="flex items-center gap-2">
           <a
             href={api.getExportUrl(batchId)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 border border-white/10 hover:border-brand-500/40 text-slate-300 text-xs font-bold transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all transform hover:scale-[1.01]"
           >
             <Download className="w-3.5 h-3.5" />
             LIMS CSV
@@ -116,11 +116,17 @@ export default function ShippingManifest() {
             </div>
             
             <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
-              <span className="text-slate-400 print:text-slate-500">Customer:</span>
+              <span className="text-slate-400 print:text-slate-500">Company Name:</span>
               <span className="font-semibold text-slate-200 print:text-black">{batch.customer?.name}</span>
 
-              <span className="text-slate-400 print:text-slate-500">Batch ID:</span>
-              <span className="font-mono text-slate-300 print:text-slate-700">{batch.id}</span>
+              <span className="text-slate-400 print:text-slate-500">Submitter Name:</span>
+              <span className="font-semibold text-slate-200 print:text-black">{batch.submitter_name || "N/A"}</span>
+
+              <span className="text-slate-400 print:text-slate-500">Batch Number:</span>
+              <span className="font-bold text-emerald-400 print:text-emerald-700 font-outfit">#{batch.batch_number || "1000"}</span>
+
+              <span className="text-slate-400 print:text-slate-500">Batch UUID:</span>
+              <span className="font-mono text-slate-300 print:text-slate-700 truncate max-w-[140px]">{batch.id}</span>
 
               <span className="text-slate-400 print:text-slate-500">Timestamp:</span>
               <span className="text-slate-300 print:text-slate-700">{new Date(batch.created_at).toLocaleString()}</span>

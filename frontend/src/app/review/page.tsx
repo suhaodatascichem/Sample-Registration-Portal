@@ -13,19 +13,18 @@ function ReviewAndConfirmContent() {
   const batchId = searchParams.get("batch_id");
 
   const [batch, setBatch] = useState<SubmissionBatch | null>(null);
-  const [customerName, setCustomerName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [submitterName, setSubmitterName] = useState("");
   const [customerMacNo, setCustomerMacNo] = useState("");
   const [rowData, setRowData] = useState<any[]>([]);
-  const [validationErrors, setValidationErrors] = useState<any[]>([]);
-  
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<any[]>([]);
 
   // Load batch data
   const loadBatch = async () => {
     if (!batchId) {
-      setErrorMsg("Batch ID is missing in query parameter.");
       setIsLoading(false);
       return;
     }
@@ -36,7 +35,8 @@ function ReviewAndConfirmContent() {
     try {
       const data = await api.getBatch(batchId);
       setBatch(data);
-      setCustomerName(data.customer?.name || "");
+      setCompanyName(data.customer?.name || "");
+      setSubmitterName(data.submitter_name || "");
       setCustomerMacNo(data.customer_mac_no || "");
       setRowData(data.samples || []);
     } catch (err: any) {
@@ -53,7 +53,7 @@ function ReviewAndConfirmContent() {
   const handleUpdateDraft = async () => {
     if (!batchId) return false;
     try {
-      await api.updateBatch(batchId, customerName, customerMacNo, rowData);
+      await api.updateBatch(batchId, companyName, customerMacNo, submitterName, rowData);
       return true;
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to update draft modifications.");
@@ -141,12 +141,26 @@ function ReviewAndConfirmContent() {
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="flex flex-col gap-1.5 flex-1 w-full">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Company Name
+              </label>
+              <input
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="e.g. Smith Farms Ltd"
+                className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5 flex-1 w-full">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Submitter Name
               </label>
               <input
                 type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
+                value={submitterName}
+                onChange={(e) => setSubmitterName(e.target.value)}
+                placeholder="e.g. John Doe"
                 className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all"
               />
             </div>
@@ -170,7 +184,7 @@ function ReviewAndConfirmContent() {
             setRowData={setRowData} 
             validationErrors={validationErrors}
             defaultMacNo={customerMacNo}
-            defaultContactPerson="Sheila"
+            defaultContactPerson={submitterName || "Sheila"}
           />
         </div>
 
@@ -188,8 +202,14 @@ function ReviewAndConfirmContent() {
               </span>
             </div>
             <div className="flex justify-between items-center text-xs text-slate-400">
-              <span>Batch ID</span>
-              <span className="font-mono text-[10px] text-slate-400 truncate max-w-[160px]">
+              <span>Batch No.</span>
+              <span className="font-bold text-brand-400 font-outfit text-sm">
+                #{batch?.batch_number || "1000"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-xs text-slate-400">
+              <span>Batch UUID</span>
+              <span className="font-mono text-[10px] text-slate-400 truncate max-w-[150px]">
                 {batch?.id}
               </span>
             </div>
@@ -202,8 +222,8 @@ function ReviewAndConfirmContent() {
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-slate-400 flex flex-col gap-2">
             <h4 className="font-bold text-slate-300">Mandatory Rules Checklist</h4>
             <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${customerName.trim() ? 'bg-emerald-400' : 'bg-red-400'}`} />
-              <span>Customer name provided</span>
+              <div className={`w-1.5 h-1.5 rounded-full ${companyName.trim() ? 'bg-emerald-400' : 'bg-red-400'}`} />
+              <span>Company name provided</span>
             </div>
             <div className="flex items-center gap-2">
               <div className={`w-1.5 h-1.5 rounded-full ${rowData.length > 0 ? 'bg-emerald-400' : 'bg-red-400'}`} />

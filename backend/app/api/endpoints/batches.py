@@ -1,8 +1,9 @@
 import uuid
 import json
+import re
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from typing import List
 from app.database import get_session
 from app.models import Customer, SubmissionBatch, Sample, AuditLog
@@ -35,10 +36,16 @@ def create_batch(batch_in: SubmissionBatchCreate, db: Session = Depends(get_sess
         db.commit()
         db.refresh(customer)
 
-    # 2. Create the submission batch (starts as draft 'pending' status)
+    # 2. Determine sequential batch number starting at 1000
+    max_num = db.exec(select(func.max(SubmissionBatch.batch_number))).first()
+    next_batch_num = 1000 if (max_num is None or max_num < 1000) else max_num + 1
+
+    # 3. Create the submission batch (starts as draft 'pending' status)
     batch = SubmissionBatch(
+        batch_number=next_batch_num,
         customer_id=customer.id, 
         customer_mac_no=batch_in.customer_mac_no,
+        submitter_name=batch_in.submitter_name,
         status="pending"
     )
     db.add(batch)
@@ -110,6 +117,7 @@ def update_batch(batch_id: uuid.UUID, batch_in: SubmissionBatchCreate, db: Sessi
     
     batch.customer_id = customer.id
     batch.customer_mac_no = batch_in.customer_mac_no
+    batch.submitter_name = batch_in.submitter_name
     db.add(batch)
 
     # 2. Delete old samples
@@ -207,11 +215,13 @@ def submit_batch(batch_id: uuid.UUID, db: Session = Depends(get_session)):
     # Update status and generate a printable QR manifest code containing manifest JSON payload
     batch.status = "submitted"
     
-    # Manifest QR payload contains batch ID, Customer name, sample list, and submission timestamp
+    # Manifest QR payload contains batch ID, sequential number, Customer name, sample list, and submission timestamp
     manifest_data = {
         "manifest_type": "LAB_SAMPLE_INTAKE",
         "batch_id": str(batch.id),
+        "batch_number": batch.batch_number,
         "customer": customer.name,
+        "submitter": batch.submitter_name,
         "sample_count": len(batch.samples),
         "timestamp": batch.created_at.isoformat()
     }
@@ -250,11 +260,19 @@ def export_batch_csv(batch_id: uuid.UUID, db: Session = Depends(get_session)):
     db.add(audit)
     db.commit()
     
-    filename = f"lims_manifest_{batch.id}.csv"
+    # Format filename: DDMMYYYY + Customer Name + Number of Samples
+    # Format date: DDMMYYYY
+    date_str = batch.created_at.strftime("%d%m%Y")
+    # Clean customer name (remove non-alphanumeric except underscores)
+    raw_customer = customer.name if customer else "Customer"
+    clean_customer = re.sub(r'[^a-zA-Z0-9]+', '', raw_customer) or "Customer"
+    sample_count = len(batch.samples) if batch.samples else 0
+    
+    filename = f"{date_str}_{clean_customer}_{sample_count}samples.csv"
     return Response(
         content=csv_content,
         media_type="text/csv",
         headers={
-            "Content-Disposition": f"attachment; filename={filename}"
+            "Content-Disposition": f'attachment; filename="{filename}"'
         }
     )

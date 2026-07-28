@@ -144,10 +144,13 @@ class SampleRead(SampleBase):
 class SubmissionBatchBase(BaseModel):
     customer_id: uuid.UUID
     customer_mac_no: Optional[str] = None
+    submitter_name: Optional[str] = None
+    batch_number: Optional[int] = None
 
 class SubmissionBatchCreate(BaseModel):
     customer_name: str
     customer_mac_no: Optional[str] = None
+    submitter_name: Optional[str] = None
     samples: List[SampleCreate]
 
 class SubmissionBatchRead(SubmissionBatchBase):

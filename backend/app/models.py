@@ -14,8 +14,10 @@ class Customer(SQLModel, table=True):
 class SubmissionBatch(SQLModel, table=True):
     __tablename__ = "submission_batches"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    batch_number: Optional[int] = Field(default=None, index=True)
     customer_id: uuid.UUID = Field(foreign_key="customers.id", index=True)
     customer_mac_no: Optional[str] = Field(default=None)
+    submitter_name: Optional[str] = Field(default=None)
     status: str = Field(default="pending")  # pending, submitted
     manifest_qr_code: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)

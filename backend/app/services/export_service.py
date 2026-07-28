@@ -48,7 +48,7 @@ class ExportService:
             
             writer.writerow([
                 str(sample.id),
-                str(batch.id),
+                str(batch.batch_number or batch.id),
                 sample.mac_no or batch.customer_mac_no or "",
                 customer.name,
                 sample.material_code,

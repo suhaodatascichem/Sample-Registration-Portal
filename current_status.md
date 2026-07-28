@@ -45,6 +45,12 @@ This document records the current status of the **Lab Sample Intake Portal** pro
 * **Render Blueprint (`render.yaml`)**: Created automated Blueprint deployment specification for Render.com.
 * **Deployment Guide (`deployment_guide.md`)**: Comprehensive documentation covering local tunnel sharing, Render manual setup (No credit card required), Render Blueprint setup, Vercel + Supabase, and Docker VPS hosting.
 
+### 📄 8. CSV Styling, Custom Export Filenames, Submitter Uncoupling & Sequential Batch IDs
+* **LIMS CSV Button**: Redesigned download button to a vibrant high-contrast Emerald Green button (`bg-emerald-600`) on the Manifest page.
+* **Export Filename**: CSV download endpoint now generates custom filenames formatted as `{DDMMYYYY}_{CustomerName}_{SampleCount}samples.csv` (e.g. `28072026_SmithFarms_5samples.csv`).
+* **Uncoupling Submitter & Company**: Separated inputs into **Company Name** (the corporate customer) and **Submitter Name** (the individual submitter/contact person), removing auto-linking.
+* **Sequential Batch IDs**: Batches automatically receive sequential numbers starting from **1000** (e.g., `#1000`, `#1001`, `#1002`...) displayed across UI, QR codes, and CSV exports.
+
 ---
 
 ## 🛰️ Git Repository Status

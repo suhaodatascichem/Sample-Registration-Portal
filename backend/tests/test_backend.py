@@ -53,6 +53,7 @@ def test_lims_csv_export():
     customer = Customer(id=cust_id, name="Test Customer")
     batch = SubmissionBatch(
         id=batch_id,
+        batch_number=1000,
         customer_id=cust_id,
         status="submitted",
         created_at=datetime(2026, 7, 27, 13, 0, 0)
@@ -78,20 +79,20 @@ def test_lims_csv_export():
     ]
     
     csv_str = ExportService.generate_lims_csv(batch, customer, samples)
-    lines = csv_str.strip().split("\r\n")
+    lines = csv_str.strip().split("\r\n") if "\r\n" in csv_str else csv_str.strip().split("\n")
     
     # Check headers
-    assert lines[0] == "SampleID,BatchID,CustomerName,MaterialCode,SampleDescription,Tests,SubmittedAt"
+    assert lines[0] == "SampleID,BatchID,MacNo,CustomerName,MaterialCode,SampleDescription,Tests,ContactPerson,SubmittedAt"
     
     # Check rows
     row1 = lines[1].split(",")
-    assert row1[1] == str(batch_id)
-    assert row1[2] == "Test Customer"
-    assert row1[3] == "BROILER"
-    assert row1[4] == "Sample 1"
-    assert row1[5] == "TOTAL_AA|NIR"
-    assert row1[6] == "2026-07-27T13:00:00Z"
+    assert row1[1] == "1000"
+    assert row1[3] == "Test Customer"
+    assert row1[4] == "BROILER"
+    assert row1[5] == "Sample 1"
+    assert row1[6] == "TOTAL_AA|NIR"
+    assert row1[8] == "2026-07-27T13:00:00Z"
     
     row2 = lines[2].split(",")
-    assert row2[3] == "PIG"
-    assert row2[5] == "SUPP_AA|GAA"
+    assert row2[4] == "PIG"
+    assert row2[6] == "SUPP_AA|GAA"
