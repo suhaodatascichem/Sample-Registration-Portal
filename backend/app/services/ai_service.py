@@ -46,15 +46,18 @@ class AIService:
         try:
             system_prompt = (
                 "You are an expert laboratory sample intake AI assistant.\n"
-                "Your job is to parse spoken voice transcripts or notes and extract lab samples in a structured JSON schema.\n"
-                "Standardize and map the material/animal codes to BROILER, PIG, FISH, RUMINANT, PET, or OTHER.\n"
-                "For requested tests, check the boolean flags:\n"
-                "- test_total_aa (Total Amino Acids, total AA, amino acids)\n"
-                "- test_supp_aa (Supplemental Amino Acids, free amino acids, supp AA)\n"
-                "- test_nir (NIR, near infrared, spectroscopy)\n"
-                "- test_trp (Tryptophan, Trp)\n"
-                "- test_gaa (GAA, guanidinoacetic acid)\n"
-                "Ensure that at least one test is set to True per sample if any test was mentioned."
+                "Your job is to parse text notes, emails, or voice transcripts and extract lab samples into a structured JSON schema.\n"
+                "Guidelines:\n"
+                "1. RANGE & COUNT EXPANSION: If the text specifies multiple samples by count or ID range (e.g. '4 broiler grower samples... descriptions 1001 to 1004'), expand them into individual sample items (e.g. 1001, 1002, 1003, 1004).\n"
+                "2. CUSTOMER / SUBMITTER: Extract company name and/or contact person (e.g., 'Japfa Indonesia (Sheila)').\n"
+                "3. MATERIAL CODES: Standardize and map material/animal types to BROILER, PIG, FISH, RUMINANT, PET, or OTHER.\n"
+                "4. TEST FLAGS: Identify requested tests and set boolean flags:\n"
+                "   - test_total_aa (Total Amino Acids, total AA)\n"
+                "   - test_supp_aa (Supplemental Amino Acids, free AA, supp AA)\n"
+                "   - test_nir (NIR, near infrared)\n"
+                "   - test_trp (Tryptophan, Trp)\n"
+                "   - test_gaa (GAA, guanidinoacetic acid)\n"
+                "5. Apply requested test flags across all corresponding samples."
             )
             
             completion = client.beta.chat.completions.parse(
@@ -123,7 +126,46 @@ class AIService:
     def _get_mock_batch_from_text(text: str) -> ExtractedBatch:
         # Very simple keyword checking mock parser
         samples = []
-        customer_name = "Global Feeds Corp"
+        if "japfa" in text.lower():
+            customer_name = "Japfa Indonesia (Sheila)"
+            return ExtractedBatch(
+                customer_name=customer_name,
+                samples=[
+                    ExtractedSample(
+                        customer_name=customer_name,
+                        material_code="BROILER",
+                        sample_description="Broiler grower feed 1001",
+                        test_total_aa=True,
+                        test_supp_aa=True,
+                        test_trp=True
+                    ),
+                    ExtractedSample(
+                        customer_name=customer_name,
+                        material_code="BROILER",
+                        sample_description="Broiler grower feed 1002",
+                        test_total_aa=True,
+                        test_supp_aa=True,
+                        test_trp=True
+                    ),
+                    ExtractedSample(
+                        customer_name=customer_name,
+                        material_code="BROILER",
+                        sample_description="Broiler grower feed 1003",
+                        test_total_aa=True,
+                        test_supp_aa=True,
+                        test_trp=True
+                    ),
+                    ExtractedSample(
+                        customer_name=customer_name,
+                        material_code="BROILER",
+                        sample_description="Broiler grower feed 1004",
+                        test_total_aa=True,
+                        test_supp_aa=True,
+                        test_trp=True
+                    ),
+                ]
+            )
+
         if "smith" in text.lower():
             customer_name = "Smith Farm"
         

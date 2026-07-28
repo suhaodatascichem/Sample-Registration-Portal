@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Volume2, Sparkles, Plus, AlertCircle, Save, Loader2, ArrowRight } from "lucide-react";
+import TextIntake from "@/components/TextIntake";
 import AudioRecorder from "@/components/AudioRecorder";
 import PhotoScanner from "@/components/PhotoScanner";
 import SampleGrid from "@/components/SampleGrid";
@@ -114,17 +115,28 @@ export default function IntakeDashboard() {
         </div>
       )}
 
-      {/* AI input widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <AudioRecorder 
-          onExtractionSuccess={handleAIExtraction} 
-          onError={handleManualError} 
-        />
-        
-        <PhotoScanner 
-          onExtractionSuccess={handleAIExtraction} 
-          onError={handleManualError} 
-        />
+      {/* AI Multimodal Input Widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Left Side: Text Intake (Primary & Larger Window) */}
+        <div className="lg:col-span-7 flex flex-col">
+          <TextIntake 
+            onExtractionSuccess={handleAIExtraction} 
+            onError={handleManualError} 
+          />
+        </div>
+
+        {/* Right Side: Voice Intake & Photo Scanner (Stacked Vertically) */}
+        <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
+          <AudioRecorder 
+            onExtractionSuccess={handleAIExtraction} 
+            onError={handleManualError} 
+          />
+          
+          <PhotoScanner 
+            onExtractionSuccess={handleAIExtraction} 
+            onError={handleManualError} 
+          />
+        </div>
       </div>
 
       {/* Worksheet & AG Grid Interface */}

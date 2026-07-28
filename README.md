@@ -6,6 +6,7 @@ An AI-powered laboratory sample registration portal designed to streamline intak
 
 ## ✨ Features
 
+*   ✍️ **Text Intake (Primary Method)**: Type or paste sample descriptions, lab notes, or email requests directly into a large intake window. Supports AI parsing, count & ID range expansions (e.g., *"4 broiler grower feed samples... 1001 to 1004"*), and quick-load template presets.
 *   🎙️ **Voice-to-Text Intake**: Record or upload audio instructions (e.g. *"Please register broiler chicken feed samples for Smith Farm. We need Total Amino Acids and NIR tests..."*). Powered by OpenAI Whisper and GPT-4o-mini structured JSON extraction.
 *   📸 **Photo Scanner (OCR)**: Upload handwritten sheets, printed labels, or manifest lists to extract customers, descriptions, and requested tests automatically via LLM Vision.
 *   📊 **Spreadsheet Grid UI**: A high-performance interactive grid (built on AG Grid) allowing manual additions, edits, mass deletions, and seamless Excel-to-grid copy-pasting.
@@ -27,17 +28,18 @@ An AI-powered laboratory sample registration portal designed to streamline intak
 ## 🚀 Quick Start
 
 ### 1. Prerequisites
-Ensure you have the following installed:
-*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (running)
-*   [Node.js](https://nodejs.org/) (v18 or newer)
-*   [Python](https://www.python.org/) (v3.10 or newer)
+Ensure you have the following installed on your PC:
+*   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Must be running for database creation)
+*   [Node.js](https://nodejs.org/) (v18 or newer - required for frontend Next.js dev server & npm)
+*   [Python](https://www.python.org/) (v3.10 or newer - required for FastAPI backend)
 
 ### 2. Run the Application
 1. Double-click the **`start.bat`** script in the project root folder.
-2. The script will automatically:
-    *   Start/create a PostgreSQL container on port `5433`.
-    *   Launch the FastAPI backend service (`http://localhost:8000`).
-    *   Launch the Next.js development server (`http://localhost:3000`).
+2. The script is portable and self-healing. It will automatically:
+    *   Detect and configure Node.js and Python environments on any PC.
+    *   Create Python `.venv` and install `pip` & `npm` dependencies automatically if missing.
+    *   Start/create the PostgreSQL container (`lab-postgres`) on port `5433`.
+    *   Launch the FastAPI backend service (`http://localhost:8000`) and Next.js frontend dev server (`http://localhost:3000`) in side-by-side command windows.
 3. Open your browser and navigate to: **`http://localhost:3000`**
 
 ### 3. API Key Configuration (Optional)

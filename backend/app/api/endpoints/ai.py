@@ -3,7 +3,7 @@ import shutil
 import tempfile
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
 from app.services.ai_service import AIService
-from app.schemas import ExtractedBatch
+from app.schemas import ExtractedBatch, TextInput
 
 router = APIRouter()
 
@@ -58,8 +58,19 @@ async def process_photo(file: UploadFile = File(...)):
             if os.path.exists(temp_path):
                 os.remove(temp_path)
                 
+@router.post("/process-text", response_model=ExtractedBatch)
+async def process_text(input_data: TextInput):
+    if not input_data.text or not input_data.text.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Text input cannot be empty"
+        )
+    try:
+        extracted_batch = AIService.extract_structured_data(input_data.text)
+        return extracted_batch
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error parsing photo with AI: {str(e)}"
+            detail=f"Error parsing text with AI: {str(e)}"
         )
+

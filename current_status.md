@@ -17,10 +17,16 @@ This document records the current status of the **Lab Sample Intake Portal** pro
 *   **Glassmorphism**: Adjusted card backdrops to semi-translucent light white layers (`rgba(255, 255, 255, 0.7)`) with a subtle purple glow drop-shadow.
 *   **AG Grid Theme**: Refactored the AG Grid styling overrides in `globals.css` so that the grid displays with a clean light layout, slate headers, and soft purple hover/selection row backgrounds.
 
-### ⚙️ 3. Next.js Build & Prerender Fix
-*   **Issue**: The production build failed because `useSearchParams()` was used inside `/review` (a Next.js Client Component) without a `Suspense` boundary, causing a build-time bailout.
-*   **Resolution**: Extracted the core review layout into a private sub-component (`ReviewAndConfirmContent`) and wrapped the exported `ReviewAndConfirm` page in a **React `<Suspense>` boundary** with a loading indicator fallback.
-*   **Status**: `npm run build` now compiles and optimizes successfully without warnings.
+### ⚙️ 3. Portable Startup Script & Self-Healing Setup (`start.bat`)
+*   **Node.js PATH Detection**: Added automatic detection for `C:\Program Files\nodejs` if `npm` is not in system PATH.
+*   **Automated Dependency Provisioning**: Automatically detects missing Python virtual environment (`.venv`) or `node_modules` and provisions them automatically (`pip install`, `npm install`).
+*   **Direct Window Launching**: Streamlined batch execution to launch both FastAPI Backend (`port 8000`) and Next.js Frontend (`port 3000`) reliably in dual command windows.
+
+### ✍️ 4. Text Intake & Range Expansion
+*   **`TextIntake.tsx` Component**: Introduced a primary text intake window on the left side of the dashboard featuring a large text area, preset template chips (e.g. *Japfa Indonesia Batch*), character counts, and AI extraction.
+*   **Backend Endpoint (`/api/ai/process-text`)**: Added structured text parsing endpoint in `ai.py` and `schemas.py`.
+*   **LLM Range Expansion Prompt Rules**: Enhanced `ai_service.py` system prompt to instruct LLMs to expand shorthand sample counts and ranges (e.g., *"4 broiler grower feed samples... 1001 to 1004"*) into individual sample items.
+*   **Dashboard Layout Realignment**: Re-architected `page.tsx` grid layout: Text Intake placed prominently in a large left-side window (`lg:col-span-7`), with Voice Intake and Photo Scanner stacked vertically on the right (`lg:col-span-5`).
 
 ---
 

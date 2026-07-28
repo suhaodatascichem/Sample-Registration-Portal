@@ -69,6 +69,7 @@ On the top right of the dashboard, enter the submitter's name (e.g., *Smith Farm
 ### Step 2: Input Sample Data
 You can populate the interactive worksheet grid in three ways:
 
+*   ✍️ **Text Intake (Primary & Fastest Method)**: Type or paste sample requests, email orders, or manifest notes directly into the large left window. Click **Extract Samples with AI**. Supports range expansions (e.g., *"4 broiler grower feed samples... descriptions 1001 to 1004"*) and pre-configured preset templates (e.g. *Japfa Indonesia Batch*).
 *   🎙️ **Voice Intake**: Click **Record** and speak naturally (e.g., *"We need to register broiler chicken feed samples. Test them for Total Amino Acids and NIR."*). Stop the recording to parse it. Alternatively, upload an audio file.
 *   📸 **Manifest Photo Scanner**: Upload an image of an intake form, handwritten list, or labels. The system uses GPT Vision to parse names, descriptions, and requested tests.
 *   ⌨️ **Manual Entry**: Directly add rows using the **Add Sample** button in the grid and edit descriptions and check/uncheck test boxes.

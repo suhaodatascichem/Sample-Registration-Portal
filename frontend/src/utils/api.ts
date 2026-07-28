@@ -80,6 +80,23 @@ export const api = {
     return response.json();
   },
 
+  async processText(text: string): Promise<ExtractedBatch> {
+    const response = await fetch(`${API_BASE_URL}/ai/process-text`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.detail || "Failed to process text with AI");
+    }
+
+    return response.json();
+  },
+
   async createBatch(customerName: string, samples: Omit<Sample, "id" | "batch_id" | "created_at">[]): Promise<SubmissionBatch> {
     const response = await fetch(`${API_BASE_URL}/batches/`, {
       method: "POST",

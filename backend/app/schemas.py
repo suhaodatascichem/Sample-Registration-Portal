@@ -173,6 +173,9 @@ class ExtractedBatch(BaseModel):
     customer_name: Optional[str] = Field(None, description="Common customer / submitter name for the batch")
     samples: List[ExtractedSample] = Field(default_factory=list)
 
+class TextInput(BaseModel):
+    text: str
+
 class AuditLogRead(BaseModel):
     id: uuid.UUID
     batch_id: uuid.UUID
