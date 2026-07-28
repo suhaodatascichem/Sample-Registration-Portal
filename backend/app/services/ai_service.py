@@ -46,10 +46,16 @@ class AIService:
                 mime_type = f"audio/{ext.replace('.', '')}"
 
             audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[audio_part, "Transcribe this audio recording into clear text."]
-            )
+            try:
+                response = client.models.generate_content(
+                    model="gemini-flash-latest",
+                    contents=[audio_part, "Transcribe this audio recording into clear text."]
+                )
+            except Exception:
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[audio_part, "Transcribe this audio recording into clear text."]
+                )
             return response.text or ""
         except Exception as e:
             logger.error(f"Gemini audio transcription failed: {e}")
@@ -80,7 +86,7 @@ class AIService:
 
             try:
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-flash-latest",
                     contents=f"Please extract sample details from this text:\n\n{text}",
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
@@ -89,9 +95,8 @@ class AIService:
                     ),
                 )
             except Exception:
-                # Fallback to gemini-1.5-flash if 2.5 is unavailable
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-2.0-flash",
                     contents=f"Please extract sample details from this text:\n\n{text}",
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
@@ -139,7 +144,7 @@ class AIService:
 
             try:
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash",
+                    model="gemini-flash-latest",
                     contents=[image_part, "Extract all samples and requested tests from this image. Standardize all fields according to schema requirements."],
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
@@ -149,7 +154,7 @@ class AIService:
                 )
             except Exception:
                 response = client.models.generate_content(
-                    model="gemini-1.5-flash",
+                    model="gemini-2.0-flash",
                     contents=[image_part, "Extract all samples and requested tests from this image. Standardize all fields according to schema requirements."],
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
