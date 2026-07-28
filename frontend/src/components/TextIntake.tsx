@@ -26,7 +26,7 @@ export default function TextIntake({ onExtractionSuccess, onError }: TextIntakeP
 
   const handleExtract = async () => {
     if (!text.trim()) {
-      onError("Please type or paste sample details into the text box first.");
+      onError("Please type sample details into the box first, or click '+ Japfa Indonesia Batch' above to load an example!");
       return;
     }
 
@@ -115,8 +115,8 @@ export default function TextIntake({ onExtractionSuccess, onError }: TextIntakeP
         <button
           type="button"
           onClick={handleExtract}
-          disabled={isProcessing || !text.trim()}
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-500 text-white font-bold text-sm shadow-xl shadow-brand-600/20 hover:shadow-brand-600/35 disabled:shadow-none transition-all transform hover:scale-[1.01] active:scale-[0.99]"
+          disabled={isProcessing}
+          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold text-sm shadow-xl shadow-brand-600/20 hover:shadow-brand-600/35 transition-all transform hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
         >
           {isProcessing ? (
             <>
