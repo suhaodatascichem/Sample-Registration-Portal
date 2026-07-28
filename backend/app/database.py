@@ -1,10 +1,24 @@
+import logging
 from sqlmodel import SQLModel, create_engine, Session
 from app.config import settings
 
-engine = create_engine(settings.database_url, echo=True)
+logger = logging.getLogger(__name__)
+
+db_url = settings.database_url
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+try:
+    engine = create_engine(db_url, echo=False, pool_pre_ping=True)
+except Exception as e:
+    logger.error(f"Failed to connect to primary DB ({db_url}): {e}. Falling back to SQLite.")
+    engine = create_engine("sqlite:///./fallback.db", echo=False)
 
 def init_db():
-    SQLModel.metadata.create_all(engine)
+    try:
+        SQLModel.metadata.create_all(engine)
+    except Exception as e:
+        logger.error(f"Error in init_db: {e}")
 
 def get_session():
     with Session(engine) as session:
