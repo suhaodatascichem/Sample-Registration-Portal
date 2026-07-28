@@ -14,15 +14,16 @@ class ExportService:
         writer.writerow([
             "SampleID",
             "BatchID",
+            "MacNo",
             "CustomerName",
             "MaterialCode",
             "SampleDescription",
             "Tests",
+            "ContactPerson",
             "SubmittedAt"
         ])
         
         # Format the submitted timestamp to ISO-8601 UTC
-        # If the timestamp doesn't have timezone info, we localize it to UTC
         submitted_at_dt = batch.created_at
         if submitted_at_dt.tzinfo is None:
             submitted_at_dt = submitted_at_dt.replace(tzinfo=timezone.utc)
@@ -48,10 +49,12 @@ class ExportService:
             writer.writerow([
                 str(sample.id),
                 str(batch.id),
+                sample.mac_no or batch.customer_mac_no or "",
                 customer.name,
                 sample.material_code,
                 sample.sample_description,
                 tests_str,
+                sample.contact_person or "Sheila",
                 submitted_at_iso
             ])
             

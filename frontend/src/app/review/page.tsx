@@ -14,6 +14,7 @@ function ReviewAndConfirmContent() {
 
   const [batch, setBatch] = useState<SubmissionBatch | null>(null);
   const [customerName, setCustomerName] = useState("");
+  const [customerMacNo, setCustomerMacNo] = useState("");
   const [rowData, setRowData] = useState<any[]>([]);
   const [validationErrors, setValidationErrors] = useState<any[]>([]);
   
@@ -36,6 +37,7 @@ function ReviewAndConfirmContent() {
       const data = await api.getBatch(batchId);
       setBatch(data);
       setCustomerName(data.customer?.name || "");
+      setCustomerMacNo(data.customer_mac_no || "");
       setRowData(data.samples || []);
     } catch (err: any) {
       setErrorMsg("Failed to load submission batch details. Make sure backend is running.");
@@ -51,7 +53,7 @@ function ReviewAndConfirmContent() {
   const handleUpdateDraft = async () => {
     if (!batchId) return false;
     try {
-      await api.updateBatch(batchId, customerName, rowData);
+      await api.updateBatch(batchId, customerName, customerMacNo, rowData);
       return true;
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to update draft modifications.");
@@ -136,22 +138,39 @@ function ReviewAndConfirmContent() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 glass-panel rounded-3xl p-6 shadow-xl flex flex-col gap-6">
           
-          <div className="flex flex-col gap-1.5 max-w-sm">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Submitter Name
-            </label>
-            <input
-              type="text"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all"
-            />
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex flex-col gap-1.5 flex-1 w-full">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Submitter Name
+              </label>
+              <input
+                type="text"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5 flex-1 w-full">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                Customer Mac. no
+              </label>
+              <input
+                type="text"
+                value={customerMacNo}
+                onChange={(e) => setCustomerMacNo(e.target.value)}
+                placeholder="e.g. MAC-8821"
+                className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all"
+              />
+            </div>
           </div>
 
           <SampleGrid 
             rowData={rowData} 
             setRowData={setRowData} 
-            validationErrors={validationErrors} 
+            validationErrors={validationErrors}
+            defaultMacNo={customerMacNo}
+            defaultContactPerson="Sheila"
           />
         </div>
 

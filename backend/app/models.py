@@ -15,6 +15,7 @@ class SubmissionBatch(SQLModel, table=True):
     __tablename__ = "submission_batches"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     customer_id: uuid.UUID = Field(foreign_key="customers.id", index=True)
+    customer_mac_no: Optional[str] = Field(default=None)
     status: str = Field(default="pending")  # pending, submitted
     manifest_qr_code: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -26,6 +27,7 @@ class Sample(SQLModel, table=True):
     __tablename__ = "samples"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     batch_id: uuid.UUID = Field(foreign_key="submission_batches.id", index=True)
+    mac_no: Optional[str] = Field(default=None)
     material_code: str  # Enum: BROILER, PIG, FISH, RUMINANT, PET, OTHER
     sample_description: str
     test_total_aa: bool = Field(default=False)
@@ -33,6 +35,7 @@ class Sample(SQLModel, table=True):
     test_nir: bool = Field(default=False)
     test_trp: bool = Field(default=False)
     test_gaa: bool = Field(default=False)
+    contact_person: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     batch: SubmissionBatch = Relationship(back_populates="samples")

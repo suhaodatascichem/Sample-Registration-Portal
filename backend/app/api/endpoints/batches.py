@@ -36,24 +36,29 @@ def create_batch(batch_in: SubmissionBatchCreate, db: Session = Depends(get_sess
         db.refresh(customer)
 
     # 2. Create the submission batch (starts as draft 'pending' status)
-    batch = SubmissionBatch(customer_id=customer.id, status="pending")
+    batch = SubmissionBatch(
+        customer_id=customer.id, 
+        customer_mac_no=batch_in.customer_mac_no,
+        status="pending"
+    )
     db.add(batch)
     db.commit()
     db.refresh(batch)
 
-    # 3. Create the samples (we allow saving drafts even if they have some validation issues,
-    # but we will enforce strict rules during finalized submission)
+    # 3. Create the samples
     db_samples = []
     for s in batch_in.samples:
         db_sample = Sample(
             batch_id=batch.id,
+            mac_no=s.mac_no,
             material_code=s.material_code,
             sample_description=s.sample_description,
             test_total_aa=s.test_total_aa,
             test_supp_aa=s.test_supp_aa,
             test_nir=s.test_nir,
             test_trp=s.test_trp,
-            test_gaa=s.test_gaa
+            test_gaa=s.test_gaa,
+            contact_person=s.contact_person
         )
         db.add(db_sample)
         db_samples.append(db_sample)
@@ -104,6 +109,7 @@ def update_batch(batch_id: uuid.UUID, batch_in: SubmissionBatchCreate, db: Sessi
         db.refresh(customer)
     
     batch.customer_id = customer.id
+    batch.customer_mac_no = batch_in.customer_mac_no
     db.add(batch)
 
     # 2. Delete old samples
@@ -117,13 +123,15 @@ def update_batch(batch_id: uuid.UUID, batch_in: SubmissionBatchCreate, db: Sessi
     for s in batch_in.samples:
         db_sample = Sample(
             batch_id=batch.id,
+            mac_no=s.mac_no,
             material_code=s.material_code,
             sample_description=s.sample_description,
             test_total_aa=s.test_total_aa,
             test_supp_aa=s.test_supp_aa,
             test_nir=s.test_nir,
             test_trp=s.test_trp,
-            test_gaa=s.test_gaa
+            test_gaa=s.test_gaa,
+            contact_person=s.contact_person
         )
         db.add(db_sample)
         db_samples.append(db_sample)

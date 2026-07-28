@@ -10,9 +10,11 @@ interface SampleGridProps {
   rowData: any[];
   setRowData: React.Dispatch<React.SetStateAction<any[]>>;
   validationErrors?: any[];
+  defaultMacNo?: string;
+  defaultContactPerson?: string;
 }
 
-export default function SampleGrid({ rowData, setRowData, validationErrors = [] }: SampleGridProps) {
+export default function SampleGrid({ rowData, setRowData, validationErrors = [], defaultMacNo = "", defaultContactPerson = "Sheila" }: SampleGridProps) {
   const gridRef = useRef<AgGridReact | null>(null);
 
   // Material dropdown options
@@ -40,14 +42,16 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [] 
           };
 
           return {
-            customer_name: cells[0] || "",
-            material_code: (cells[1] || "OTHER").trim().toUpperCase(),
-            sample_description: cells[2] || "",
-            test_total_aa: parseBool(cells[3]),
-            test_supp_aa: parseBool(cells[4]),
-            test_nir: parseBool(cells[5]),
-            test_trp: parseBool(cells[6]),
-            test_gaa: parseBool(cells[7])
+            mac_no: cells[0] || defaultMacNo || "",
+            customer_name: cells[1] || "",
+            material_code: (cells[2] || "OTHER").trim().toUpperCase(),
+            sample_description: cells[3] || "",
+            test_total_aa: parseBool(cells[4]),
+            test_supp_aa: parseBool(cells[5]),
+            test_nir: parseBool(cells[6]),
+            test_trp: parseBool(cells[7]),
+            test_gaa: parseBool(cells[8]),
+            contact_person: cells[9] || defaultContactPerson || "Sheila"
           };
         });
 
@@ -73,6 +77,13 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [] 
       width: 60,
       pinned: "left",
       cellClass: "text-slate-500 font-semibold text-center"
+    },
+    {
+      headerName: "Mac. no",
+      field: "mac_no",
+      editable: true,
+      flex: 1.2,
+      cellClass: "font-semibold text-slate-800"
     },
     {
       headerName: "Customer ID",
@@ -141,6 +152,13 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [] 
       cellEditor: "agCheckboxCellEditor",
       width: 80,
       cellClass: "flex items-center justify-center"
+    },
+    {
+      headerName: "Contact Person",
+      field: "contact_person",
+      editable: true,
+      flex: 1.4,
+      cellClass: "font-medium text-brand-600"
     }
   ], []);
 
@@ -156,17 +174,19 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [] 
   }), []);
 
   const addRow = () => {
-    // Find last customer name used to prefill for efficiency
-    const lastCustomer = rowData.length > 0 ? rowData[rowData.length - 1].customer_name : "";
+    // Find last row values to prefill for efficiency
+    const lastRow = rowData.length > 0 ? rowData[rowData.length - 1] : null;
     const newRow = {
-      customer_name: lastCustomer,
+      mac_no: lastRow?.mac_no || defaultMacNo || "",
+      customer_name: lastRow?.customer_name || "",
       material_code: "BROILER",
       sample_description: "",
       test_total_aa: false,
       test_supp_aa: false,
       test_nir: false,
       test_trp: false,
-      test_gaa: false
+      test_gaa: false,
+      contact_person: lastRow?.contact_person || defaultContactPerson || "Sheila"
     };
     setRowData((prev) => [...prev, newRow]);
   };

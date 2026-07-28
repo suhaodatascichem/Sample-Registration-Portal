@@ -96,6 +96,7 @@ class CustomerRead(CustomerBase):
 
 # Sample Validation & Schemas
 class SampleBase(BaseModel):
+    mac_no: Optional[str] = None
     material_code: str
     sample_description: str
     test_total_aa: bool = False
@@ -103,6 +104,7 @@ class SampleBase(BaseModel):
     test_nir: bool = False
     test_trp: bool = False
     test_gaa: bool = False
+    contact_person: Optional[str] = None
 
     @field_validator("material_code", mode="before")
     @classmethod
@@ -141,9 +143,11 @@ class SampleRead(SampleBase):
 # Submission Batch Schemas
 class SubmissionBatchBase(BaseModel):
     customer_id: uuid.UUID
+    customer_mac_no: Optional[str] = None
 
 class SubmissionBatchCreate(BaseModel):
     customer_name: str
+    customer_mac_no: Optional[str] = None
     samples: List[SampleCreate]
 
 class SubmissionBatchRead(SubmissionBatchBase):
@@ -160,6 +164,7 @@ class SubmissionBatchWithSamples(SubmissionBatchRead):
 
 # AI Extraction schemas
 class ExtractedSample(BaseModel):
+    mac_no: Optional[str] = Field(None, description="Customer machine / Mac number if mentioned")
     customer_name: Optional[str] = Field(None, description="Name of the customer / submitter if mentioned")
     material_code: Optional[str] = Field(None, description="Material/animal type mentioned (e.g. broiler, pig, fish, ruminant, cow, dog, pet, other)")
     sample_description: Optional[str] = Field(None, description="Short text describing the sample")
@@ -168,9 +173,11 @@ class ExtractedSample(BaseModel):
     test_nir: bool = Field(False, description="True if NIR, near infrared, or spectroscopy is requested")
     test_trp: bool = Field(False, description="True if tryptophan, Trp, or amino acid tryptophan is requested")
     test_gaa: bool = Field(False, description="True if GAA, guanidinoacetic acid, or similar is requested")
+    contact_person: Optional[str] = Field(None, description="Lab contact person handling the sample (e.g. Sheila)")
 
 class ExtractedBatch(BaseModel):
     customer_name: Optional[str] = Field(None, description="Common customer / submitter name for the batch")
+    customer_mac_no: Optional[str] = Field(None, description="Customer Mac number for the batch")
     samples: List[ExtractedSample] = Field(default_factory=list)
 
 class TextInput(BaseModel):
