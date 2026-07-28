@@ -2,7 +2,8 @@ import os
 import base64
 import logging
 from typing import Optional, List
-from openai import OpenAI
+from google import genai
+from google.genai import types
 from app.config import settings
 from app.schemas import ExtractedBatch, ExtractedSample
 
@@ -10,37 +11,54 @@ logger = logging.getLogger(__name__)
 
 class AIService:
     @staticmethod
-    def _get_client() -> Optional[OpenAI]:
-        # Try to read key from config or environment variable
-        api_key = settings.openai_api_key or os.environ.get("OPENAI_API_KEY")
+    def _get_client() -> Optional[genai.Client]:
+        # Try to read Google Gemini key from config or environment variables
+        api_key = (
+            settings.gemini_api_key or 
+            settings.google_api_key or 
+            os.environ.get("GEMINI_API_KEY") or 
+            os.environ.get("GOOGLE_API_KEY") or
+            settings.openai_api_key or
+            os.environ.get("OPENAI_API_KEY")
+        )
         if not api_key:
-            logger.warning("OPENAI_API_KEY is not configured. Running in Mock Mode.")
+            logger.warning("GEMINI_API_KEY / GOOGLE_API_KEY is not configured. Running in Mock Mode.")
             return None
-        return OpenAI(api_key=api_key)
+        try:
+            return genai.Client(api_key=api_key)
+        except Exception as e:
+            logger.error(f"Failed to initialize Google GenAI client: {e}")
+            return None
 
     @classmethod
     def transcribe_audio(cls, audio_file_path: str) -> str:
         client = cls._get_client()
         if not client:
-            # Mock transcription
-            return "This is a mock transcription: Please register broiler chicken feed samples for Smith Farm. We need Total Amino Acids and NIR tests. Also, swine feed for piglet sample, test for NIR and GAA."
+            return "This is a mock transcription: Please register broiler chicken feed samples for Smith Farm. We need Total Amino Acids and NIR tests."
 
         try:
             with open(audio_file_path, "rb") as audio_file:
-                transcript = client.audio.transcriptions.create(
-                    model="whisper-1",
-                    file=audio_file
-                )
-                return transcript.text
+                audio_bytes = audio_file.read()
+
+            ext = os.path.splitext(audio_file_path)[1].lower()
+            mime_type = "audio/webm"
+            if ext in [".wav", ".mp3", ".m4a", ".ogg"]:
+                mime_type = f"audio/{ext.replace('.', '')}"
+
+            audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=[audio_part, "Transcribe this audio recording into clear text."]
+            )
+            return response.text or ""
         except Exception as e:
-            logger.error(f"Whisper transcription failed: {e}")
-            raise RuntimeError(f"Failed to transcribe audio: {str(e)}")
+            logger.error(f"Gemini audio transcription failed: {e}")
+            raise RuntimeError(f"Failed to transcribe audio with Gemini: {str(e)}")
 
     @classmethod
     def extract_structured_data(cls, text: str) -> ExtractedBatch:
         client = cls._get_client()
         if not client:
-            # Return mock parsed batch based on keywords or default values
             return cls._get_mock_batch_from_text(text)
 
         try:
@@ -59,31 +77,52 @@ class AIService:
                 "   - test_gaa (GAA, guanidinoacetic acid)\n"
                 "5. Apply requested test flags across all corresponding samples."
             )
-            
-            completion = client.beta.chat.completions.parse(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": f"Please extract sample details from this text:\n\n{text}"}
-                ],
-                response_format=ExtractedBatch,
-            )
-            return completion.choices[0].message.parsed
+
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=f"Please extract sample details from this text:\n\n{text}",
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=ExtractedBatch,
+                        system_instruction=system_prompt,
+                    ),
+                )
+            except Exception:
+                # Fallback to gemini-1.5-flash if 2.5 is unavailable
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=f"Please extract sample details from this text:\n\n{text}",
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=ExtractedBatch,
+                        system_instruction=system_prompt,
+                    ),
+                )
+
+            if response.parsed:
+                return response.parsed
+            return ExtractedBatch.model_validate_json(response.text)
         except Exception as e:
-            logger.error(f"LLM Structured extraction failed: {e}")
-            raise RuntimeError(f"Failed to extract structured data: {str(e)}")
+            logger.error(f"Gemini structured extraction failed: {e}")
+            raise RuntimeError(f"Failed to extract structured data with Gemini: {str(e)}")
 
     @classmethod
     def process_photo(cls, image_file_path: str) -> ExtractedBatch:
         client = cls._get_client()
         if not client:
-            # Return mock parsed batch for demo purposes
             return cls._get_mock_photo_batch()
 
         try:
-            # Read and base64 encode the image
             with open(image_file_path, "rb") as image_file:
-                base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+                image_bytes = image_file.read()
+
+            ext = os.path.splitext(image_file_path)[1].lower()
+            mime_type = "image/jpeg"
+            if ext in [".png", ".webp"]:
+                mime_type = f"image/{ext.replace('.', '')}"
+
+            image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
 
             system_prompt = (
                 "You are a laboratory sample OCR and extraction assistant. You analyze images of sample intake sheets, handwritten manifests, or labels.\n"
@@ -98,29 +137,33 @@ class AIService:
                 "Ensure that you extract the Customer/Submitter Name if visible on the sheet."
             )
 
-            completion = client.beta.chat.completions.parse(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": "Extract all samples and requested tests from this image. Standardize all fields according to schema requirements."},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{base64_image}"
-                                }
-                            }
-                        ]
-                    }
-                ],
-                response_format=ExtractedBatch,
-            )
-            return completion.choices[0].message.parsed
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=[image_part, "Extract all samples and requested tests from this image. Standardize all fields according to schema requirements."],
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=ExtractedBatch,
+                        system_instruction=system_prompt,
+                    ),
+                )
+            except Exception:
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=[image_part, "Extract all samples and requested tests from this image. Standardize all fields according to schema requirements."],
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=ExtractedBatch,
+                        system_instruction=system_prompt,
+                    ),
+                )
+
+            if response.parsed:
+                return response.parsed
+            return ExtractedBatch.model_validate_json(response.text)
         except Exception as e:
-            logger.error(f"LLM vision extraction failed: {e}")
-            raise RuntimeError(f"Failed to process image with AI: {str(e)}")
+            logger.error(f"Gemini vision extraction failed: {e}")
+            raise RuntimeError(f"Failed to process image with Gemini: {str(e)}")
 
     @staticmethod
     def _get_mock_batch_from_text(text: str) -> ExtractedBatch:
