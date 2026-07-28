@@ -5,12 +5,20 @@ cd /d "%~dp0"
 :: Ensure Node.js is in PATH if installed in standard location
 if exist "C:\Program Files\nodejs" set "PATH=C:\Program Files\nodejs;%PATH%"
 
-echo ===================================================
-echo Sharing Lab Portal via Public Cloud Tunnel
-echo ===================================================
-echo Ensure start.bat is running in the background!
-echo Generating shareable public link for http://localhost:3000 ...
-echo ===================================================
+echo ====================================================================
+echo             SAMPLE REGISTRATION PORTAL - CLOUD SHARING              
+echo ====================================================================
+echo.
+echo Make sure start.bat is running in the background!
+echo Generating free public cloud link for http://localhost:3000 ...
+echo.
+echo ====================================================================
+echo Copy the URL printed below and send it to your boss/users:
+echo ====================================================================
+echo.
 
-npx ngrok http 3000
+npx -y localtunnel --port 3000
+
+echo.
+echo Tunnel closed.
 pause
