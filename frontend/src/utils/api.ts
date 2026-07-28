@@ -1,4 +1,7 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const rawUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+export const API_BASE_URL = rawUrl.startsWith("http")
+  ? (rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`)
+  : `https://${rawUrl}/api`;
 
 export interface ExtractedSample {
   mac_no?: string;

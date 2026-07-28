@@ -24,7 +24,7 @@ services:
         fromService:
           type: web
           name: sample-portal-backend
-          property: url
+          property: host
 
 databases:
   - name: sample-portal-db
