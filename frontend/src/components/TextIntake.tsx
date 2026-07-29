@@ -1,3 +1,8 @@
+"use client";
+
+import React, { useState } from "react";
+import { FileText, Sparkles, Loader2, Trash2 } from "lucide-react";
+import { api, ExtractedBatch } from "@/utils/api";
 import TestGuide from "@/components/TestGuide";
 
 interface TextIntakeProps {
@@ -55,7 +60,8 @@ export default function TextIntake({ textValue, setTextValue, onExtractionSucces
   };
 
   const handleInsertPhrase = (phrase: string) => {
-    setText((prev) => (prev ? `${prev}, ${phrase}` : phrase));
+    const updated = text ? `${text}, ${phrase}` : phrase;
+    setText(updated);
   };
 
   return (

@@ -82,6 +82,8 @@ function parseBackendDetail(errData: any, defaultMsg: string): string {
     return errData.detail.message;
   }
   return JSON.stringify(errData.detail);
+}
+
 export const api = {
   async transcribeAudio(file: File): Promise<{ text: string }> {
     const formData = new FormData();
@@ -123,6 +125,8 @@ export const api = {
     } catch (err: any) {
       return handleFetchError(err, "audio extraction");
     }
+  },
+
   async ocrPhoto(file: File): Promise<{ text: string }> {
     const formData = new FormData();
     formData.append("file", file);
