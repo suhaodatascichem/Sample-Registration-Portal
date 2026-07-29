@@ -3,6 +3,8 @@ backend/.venv/
 backend/.pytest_cache/
 **/__pycache__/
 *.pyc
+*.db
+*.sqlite
 backend/.env
 
 # Node.js / Next.js
