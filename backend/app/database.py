@@ -17,6 +17,7 @@ except Exception as e:
     engine = create_engine("sqlite:///./fallback.db", echo=False, pool_pre_ping=True)
 
 def init_db():
+    import app.models  # Ensure all SQLModel tables (Customer, SubmissionBatch, Sample, AuditLog) are registered in metadata
     try:
         SQLModel.metadata.create_all(engine)
     except Exception as e:
