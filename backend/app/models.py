@@ -37,6 +37,7 @@ class Sample(SQLModel, table=True):
     test_nir: bool = Field(default=False)
     test_trp: bool = Field(default=False)
     test_gaa: bool = Field(default=False)
+    test_tdf: bool = Field(default=False)
     contact_person: Optional[str] = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     

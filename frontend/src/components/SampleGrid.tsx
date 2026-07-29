@@ -63,7 +63,8 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
             test_nir: parseBool(cells[6]),
             test_trp: parseBool(cells[7]),
             test_gaa: parseBool(cells[8]),
-            contact_person: cells[9] || defaultContactPerson || "Sheila"
+            test_tdf: parseBool(cells[9]),
+            contact_person: cells[10] || defaultContactPerson || "Sheila"
           };
         });
 
@@ -166,6 +167,15 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       cellClass: "flex items-center justify-center"
     },
     {
+      headerName: "TDF",
+      field: "test_tdf",
+      editable: true,
+      cellRenderer: "agCheckboxCellRenderer",
+      cellEditor: "agCheckboxCellEditor",
+      width: 80,
+      cellClass: "flex items-center justify-center"
+    },
+    {
       headerName: "Contact Person",
       field: "contact_person",
       editable: true,
@@ -198,6 +208,7 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       test_nir: false,
       test_trp: false,
       test_gaa: false,
+      test_tdf: false,
       contact_person: lastRow?.contact_person || defaultContactPerson || "Sheila"
     };
     setRowData((prev) => [...prev, newRow]);

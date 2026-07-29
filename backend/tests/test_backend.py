@@ -30,8 +30,15 @@ def test_mock_text_extraction_soybean_meal():
         batch.samples[0].test_supp_aa,
         batch.samples[0].test_nir,
         batch.samples[0].test_trp,
-        batch.samples[0].test_gaa
+        batch.samples[0].test_gaa,
+        batch.samples[0].test_tdf
     ])
+
+def test_tdf_extraction():
+    from app.services.ai_service import AIService
+    batch = AIService.extract_structured_data("3 wheat bran samples, test total dietary fiber (TDF)")
+    assert len(batch.samples) == 3
+    assert batch.samples[0].test_tdf is True
 
 def test_sample_validation_success():
     # Valid sample with 1 test

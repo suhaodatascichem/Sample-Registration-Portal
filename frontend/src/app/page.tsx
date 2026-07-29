@@ -26,7 +26,13 @@ export default function IntakeDashboard() {
     setTextIntakeValue((prev) => (prev ? `${prev}\n\n${transcriptText}` : transcriptText));
   };
 
-  // Callback when AI extracts a batch from photo or text
+  // Callback when Photo Scanner performs OCR on handwritten or sheet photos
+  const handlePhotoOCR = (ocrText: string) => {
+    setErrorMsg(null);
+    setTextIntakeValue((prev) => (prev ? `${prev}\n\n${ocrText}` : ocrText));
+  };
+
+  // Callback when AI extracts a batch from text intake notes
   const handleAIExtraction = (data: ExtractedBatch) => {
     setErrorMsg(null);
     if (data.customer_name) {
@@ -47,6 +53,7 @@ export default function IntakeDashboard() {
       test_nir: s.test_nir,
       test_trp: s.test_trp,
       test_gaa: s.test_gaa,
+      test_tdf: s.test_tdf,
       contact_person: s.contact_person || "Sheila"
     }));
 
@@ -81,6 +88,7 @@ export default function IntakeDashboard() {
         test_nir: !!row.test_nir,
         test_trp: !!row.test_trp,
         test_gaa: !!row.test_gaa,
+        test_tdf: !!row.test_tdf,
         contact_person: row.contact_person || "Sheila"
       }));
 
@@ -98,55 +106,66 @@ export default function IntakeDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8 font-inter">
-      {/* Welcome Title Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-brand-300 bg-clip-text text-transparent font-outfit">
-            Samples Information
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              Lab Intake Portal • 2-Step Multimodal Intake
+            </span>
+          </div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight mt-2 font-outfit">
+            Sample Intake & Registration
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Register new samples quickly using text, voice recordings, scanner sheets, or spreadsheet grids.
+          <p className="text-slate-400 text-sm mt-1">
+            Capture sample details via voice or photo (Step 1), then review & extract structured tables (Step 2).
           </p>
         </div>
+      </div>
+
+      {/* Top Banner: Primary Batch Identification Details */}
+      <div className="glass-panel rounded-3xl p-6 shadow-xl">
+        <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2 font-outfit">
+          <Sparkles className="w-4 h-4 text-brand-400" /> Batch Identification Details
+        </h2>
         
-        {/* Customer & Mac No Inputs */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex flex-col gap-1.5 min-w-[180px] w-full sm:w-auto">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Company Name
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
+              Customer / Company Name <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="e.g. Smith Farms Ltd"
-              className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all shadow-inner"
+              placeholder="e.g. Japfa Indonesia"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-slate-100 placeholder-slate-500 text-sm transition-all"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5 min-w-[160px] w-full sm:w-auto">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Submitter Name
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
+              Submitter / Contact Person
             </label>
             <input
               type="text"
               value={submitterName}
               onChange={(e) => setSubmitterName(e.target.value)}
-              placeholder="e.g. John Doe"
-              className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all shadow-inner"
+              placeholder="e.g. Sheila (Lab Officer)"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-slate-100 placeholder-slate-500 text-sm transition-all"
             />
           </div>
 
-          <div className="flex flex-col gap-1.5 min-w-[160px] w-full sm:w-auto">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Customer Mac. no
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-2">
+              Default Machine / Mac No.
             </label>
             <input
               type="text"
               value={customerMacNo}
               onChange={(e) => setCustomerMacNo(e.target.value)}
-              placeholder="e.g. MAC-8821"
-              className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all shadow-inner"
+              placeholder="e.g. MAC-9941"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-slate-100 placeholder-slate-500 text-sm transition-all"
             />
           </div>
         </div>
@@ -159,19 +178,9 @@ export default function IntakeDashboard() {
         </div>
       )}
 
-      {/* AI Multimodal Input Widgets */}
+      {/* AI Multimodal 2-Step Intake Widgets */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Left Side: Text Intake (Primary & Larger Window) */}
-        <div className="lg:col-span-7 flex flex-col">
-          <TextIntake 
-            textValue={textIntakeValue}
-            setTextValue={setTextIntakeValue}
-            onExtractionSuccess={handleAIExtraction} 
-            onError={handleManualError} 
-          />
-        </div>
-
-        {/* Right Side: Voice Intake & Photo Scanner (Stacked Vertically) */}
+        {/* Step 1 (Left Side - Col 5): Voice Intake & Photo Scanner */}
         <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
           <AudioRecorder 
             onTranscriptionSuccess={handleVoiceTranscription} 
@@ -179,6 +188,16 @@ export default function IntakeDashboard() {
           />
           
           <PhotoScanner 
+            onOCRSuccess={handlePhotoOCR} 
+            onError={handleManualError} 
+          />
+        </div>
+
+        {/* Step 2 (Right Side - Col 7): Text Intake (Primary Review & Extraction Window) */}
+        <div className="lg:col-span-7 flex flex-col">
+          <TextIntake 
+            textValue={textIntakeValue}
+            setTextValue={setTextIntakeValue}
             onExtractionSuccess={handleAIExtraction} 
             onError={handleManualError} 
           />

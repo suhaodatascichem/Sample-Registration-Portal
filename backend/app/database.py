@@ -28,7 +28,8 @@ def init_db():
                 "ALTER TABLE submission_batches ADD COLUMN IF NOT EXISTS batch_number INTEGER",
                 "ALTER TABLE submission_batches ADD COLUMN IF NOT EXISTS customer_mac_no VARCHAR",
                 "ALTER TABLE submission_batches ADD COLUMN IF NOT EXISTS submitter_name VARCHAR",
-                "ALTER TABLE samples ADD COLUMN IF NOT EXISTS contact_person VARCHAR"
+                "ALTER TABLE samples ADD COLUMN IF NOT EXISTS contact_person VARCHAR",
+                "ALTER TABLE samples ADD COLUMN IF NOT EXISTS test_tdf BOOLEAN DEFAULT FALSE"
             ]
             for stmt in migrations:
                 try:

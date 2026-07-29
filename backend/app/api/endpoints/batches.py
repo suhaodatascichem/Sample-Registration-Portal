@@ -65,6 +65,7 @@ def create_batch(batch_in: SubmissionBatchCreate, db: Session = Depends(get_sess
             test_nir=s.test_nir,
             test_trp=s.test_trp,
             test_gaa=s.test_gaa,
+            test_tdf=s.test_tdf,
             contact_person=s.contact_person
         )
         db.add(db_sample)

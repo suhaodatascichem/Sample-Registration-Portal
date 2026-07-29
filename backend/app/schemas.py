@@ -159,6 +159,7 @@ class SampleBase(BaseModel):
     test_nir: bool = False
     test_trp: bool = False
     test_gaa: bool = False
+    test_tdf: bool = False
     contact_person: Optional[str] = None
 
     @field_validator("material_code", mode="before")
@@ -180,10 +181,11 @@ class SampleBase(BaseModel):
             self.test_supp_aa,
             self.test_nir,
             self.test_trp,
-            self.test_gaa
+            self.test_gaa,
+            self.test_tdf
         ]
         if not any(tests):
-            raise ValueError("At least one test must be requested (total_aa, supp_aa, nir, trp, gaa)")
+            raise ValueError("At least one test must be requested (total_aa, supp_aa, nir, trp, gaa, tdf)")
         return self
 
 class SampleCreate(SampleBase):
@@ -231,6 +233,7 @@ class ExtractedSample(BaseModel):
     test_nir: bool = Field(False, description="True if NIR, near infrared, or spectroscopy is requested")
     test_trp: bool = Field(False, description="True if tryptophan, Trp, or amino acid tryptophan is requested")
     test_gaa: bool = Field(False, description="True if GAA, guanidinoacetic acid, or similar is requested")
+    test_tdf: bool = Field(False, description="True if TDF, total dietary fiber, or dietary fiber is requested")
     contact_person: Optional[str] = Field(None, description="Lab contact person handling the sample (e.g. Sheila)")
 
 class ExtractedBatch(BaseModel):

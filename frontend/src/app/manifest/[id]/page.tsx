@@ -176,6 +176,7 @@ export default function ShippingManifest() {
                   if (sample.test_nir) tests.push("NIR");
                   if (sample.test_trp) tests.push("Trp");
                   if (sample.test_gaa) tests.push("GAA");
+                  if (sample.test_tdf) tests.push("TDF");
 
                   return (
                     <tr key={sample.id} className="hover:bg-white/5 print:text-black">

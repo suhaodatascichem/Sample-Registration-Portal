@@ -60,6 +60,30 @@ async def process_audio(file: UploadFile = File(...)):
             detail=f"Error parsing audio with AI: {str(e)}"
         )
 
+class OCRPhotoResponse(BaseModel):
+    text: str
+
+@router.post("/ocr-photo", response_model=OCRPhotoResponse)
+async def ocr_photo(file: UploadFile = File(...)):
+    try:
+        ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
+        suffix = ext if ext else ".jpg"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+            shutil.copyfileobj(file.file, temp_file)
+            temp_path = temp_file.name
+
+        try:
+            ocr_text = AIService.process_photo_to_text(temp_path)
+            return {"text": ocr_text}
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error performing OCR on photo: {str(e)}"
+        )
+
 @router.post("/process-photo", response_model=ExtractedBatch)
 async def process_photo(file: UploadFile = File(...)):
     # Write to a temp file

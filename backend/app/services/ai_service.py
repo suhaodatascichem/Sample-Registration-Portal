@@ -86,6 +86,7 @@ class AIService:
                 "   - test_nir (NIR, near infrared)\n"
                 "   - test_trp (Tryptophan, Trp)\n"
                 "   - test_gaa (GAA, guanidinoacetic acid)\n"
+                "   - test_tdf (Total Dietary Fiber, TDF, dietary fiber)\n"
                 "5. Apply requested test flags across all corresponding samples. If no specific tests are explicitly named or generic terms like 'required tests' or 'all tests' are mentioned, set test_total_aa and test_nir to true so that at least one test is active."
             )
 
@@ -118,6 +119,46 @@ class AIService:
             return cls._get_mock_batch_from_text(text)
 
     @classmethod
+    def process_photo_to_text(cls, image_file_path: str) -> str:
+        client = cls._get_client()
+        if not client:
+            return "Customer: Agri-Nutrition Labs\nSample 1: Broiler starter mash #001 - test Total AA, NIR, and TRP\nSample 2: Aquaculture shrimp feed #002 - test Supp AA and TDF\nSample 3: Alfalfa hay batch B - test NIR and TDF"
+
+        try:
+            with open(image_file_path, "rb") as image_file:
+                image_bytes = image_file.read()
+
+            ext = os.path.splitext(image_file_path)[1].lower()
+            mime_type = "image/jpeg"
+            if ext in [".png", ".webp"]:
+                mime_type = f"image/{ext.replace('.', '')}"
+
+            image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+
+            system_prompt = (
+                "You are an expert OCR and laboratory manifest digitizer. "
+                "Analyze the image of handwritten or printed sample intake sheets, labels, or manifests. "
+                "Transcribe all text into clean, tidy, structured English intake notes. "
+                "Clearly list customer names, sample descriptions, material types (e.g. soybean meal, broiler feed, corn), sample counts, and requested tests (Total AA, Supp AA, NIR, TRP, GAA, TDF)."
+            )
+
+            try:
+                response = client.models.generate_content(
+                    model="gemini-flash-latest",
+                    contents=[image_part, system_prompt]
+                )
+            except Exception:
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[image_part, system_prompt]
+                )
+
+            return response.text or ""
+        except Exception as e:
+            logger.warning(f"Gemini vision OCR failed ({e}). Falling back to local mock photo text.")
+            return "Customer: Agri-Nutrition Labs\nSample 1: Broiler starter mash #001 - test Total AA, NIR, and TRP\nSample 2: Aquaculture shrimp feed #002 - test Supp AA and TDF\nSample 3: Alfalfa hay batch B - test NIR and TDF"
+
+    @classmethod
     def process_photo(cls, image_file_path: str) -> ExtractedBatch:
         client = cls._get_client()
         if not client:
@@ -144,6 +185,7 @@ class AIService:
                 "- test_nir (NIR)\n"
                 "- test_trp (Tryptophan / Trp)\n"
                 "- test_gaa (GAA)\n"
+                "- test_tdf (Total Dietary Fiber / TDF)\n"
                 "Ensure that you extract the Customer/Submitter Name if visible on the sheet."
             )
 
@@ -205,9 +247,10 @@ class AIService:
         test_nir = "nir" in lowered or "near infrared" in lowered
         test_trp = "trp" in lowered or "tryptophan" in lowered
         test_gaa = "gaa" in lowered or "guanidino" in lowered
+        test_tdf = "tdf" in lowered or "dietary fiber" in lowered or "fiber" in lowered
 
         # Default tests if none explicitly named or generic "required tests" specified
-        if not any([test_total_aa, test_supp_aa, test_nir, test_trp, test_gaa]) or "required test" in lowered:
+        if not any([test_total_aa, test_supp_aa, test_nir, test_trp, test_gaa, test_tdf]) or "required test" in lowered:
             test_total_aa = True
             test_nir = True
 
@@ -224,6 +267,7 @@ class AIService:
                     test_nir=test_nir,
                     test_trp=test_trp,
                     test_gaa=test_gaa,
+                    test_tdf=test_tdf,
                 )
             )
 

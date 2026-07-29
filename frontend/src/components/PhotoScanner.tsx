@@ -5,11 +5,11 @@ import { Upload, Image as ImageIcon, Loader2, Sparkles, X } from "lucide-react";
 import { api, ExtractedBatch } from "@/utils/api";
 
 interface PhotoScannerProps {
-  onExtractionSuccess: (data: ExtractedBatch) => void;
+  onOCRSuccess: (text: string) => void;
   onError: (error: string) => void;
 }
 
-export default function PhotoScanner({ onExtractionSuccess, onError }: PhotoScannerProps) {
+export default function PhotoScanner({ onOCRSuccess, onError }: PhotoScannerProps) {
   const [dragActive, setDragActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -62,8 +62,8 @@ export default function PhotoScanner({ onExtractionSuccess, onError }: PhotoScan
 
     setIsProcessing(true);
     try {
-      const data = await api.processPhoto(file);
-      onExtractionSuccess(data);
+      const result = await api.ocrPhoto(file);
+      onOCRSuccess(result.text);
     } catch (err: any) {
       onError(err.message || "Failed to parse sample sheet image.");
     } finally {
@@ -90,7 +90,7 @@ export default function PhotoScanner({ onExtractionSuccess, onError }: PhotoScan
       <div className="w-full text-center mt-2">
         <h3 className="text-lg font-semibold text-slate-100 font-outfit">Photo Intake</h3>
         <p className="text-xs text-slate-400 mt-1">
-          Scan paper manifests, handwritten logs, or sample label photos.
+          Scan paper manifests or label photos directly into Text Intake.
         </p>
       </div>
 

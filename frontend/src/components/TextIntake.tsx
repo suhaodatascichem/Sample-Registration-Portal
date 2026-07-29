@@ -1,8 +1,4 @@
-"use client";
-
-import React, { useState } from "react";
-import { FileText, Sparkles, Loader2, Trash2, CopyCheck } from "lucide-react";
-import { api, ExtractedBatch } from "@/utils/api";
+import TestGuide from "@/components/TestGuide";
 
 interface TextIntakeProps {
   textValue?: string;
@@ -19,6 +15,10 @@ const EXAMPLES = [
   {
     label: "Smith Farms Feed",
     text: "Customer: Smith Farms Ltd\nSample 1: Broiler finisher feed - test Total AA and NIR\nSample 2: Piglet starter feed - test NIR and GAA",
+  },
+  {
+    label: "Wheat Bran Fiber",
+    text: "Customer: Agri-Nutrition Labs\nRequest: 3 wheat bran samples\nTests: Total Dietary Fiber (TDF) and NIR test",
   },
 ];
 
@@ -54,6 +54,10 @@ export default function TextIntake({ textValue, setTextValue, onExtractionSucces
     setText("");
   };
 
+  const handleInsertPhrase = (phrase: string) => {
+    setText((prev) => (prev ? `${prev}, ${phrase}` : phrase));
+  };
+
   return (
     <div className="glass-panel glass-panel-glow rounded-3xl p-6 flex flex-col justify-between h-full min-h-[380px] transition-all relative overflow-hidden">
       {/* Badge */}
@@ -73,6 +77,9 @@ export default function TextIntake({ textValue, setTextValue, onExtractionSucces
             </p>
           </div>
         </div>
+
+        {/* Test Guide & Spoken Phrases */}
+        <TestGuide onInsertPhrase={handleInsertPhrase} />
 
         {/* Preset Template Chips */}
         <div className="flex flex-wrap items-center gap-2 mb-3">

@@ -238,7 +238,7 @@ function ReviewAndConfirmContent() {
               <span>All sample descriptions filled</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${rowData.every(r => r.test_total_aa || r.test_supp_aa || r.test_nir || r.test_trp || r.test_gaa) ? 'bg-emerald-400' : 'bg-red-400'}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${rowData.every(r => r.test_total_aa || r.test_supp_aa || r.test_nir || r.test_trp || r.test_gaa || r.test_tdf) ? 'bg-emerald-400' : 'bg-red-400'}`} />
               <span>At least 1 test requested per sample</span>
             </div>
           </div>

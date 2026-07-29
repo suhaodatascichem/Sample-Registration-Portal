@@ -43,6 +43,8 @@ class ExportService:
                 tests_list.append("TRP")
             if sample.test_gaa:
                 tests_list.append("GAA")
+            if getattr(sample, "test_tdf", False):
+                tests_list.append("TDF")
             
             tests_str = "|".join(tests_list)
             

@@ -19,6 +19,7 @@ export interface ExtractedSample {
   test_nir: boolean;
   test_trp: boolean;
   test_gaa: boolean;
+  test_tdf: boolean;
   contact_person?: string;
 }
 
@@ -45,6 +46,7 @@ export interface Sample {
   test_nir: boolean;
   test_trp: boolean;
   test_gaa: boolean;
+  test_tdf: boolean;
   contact_person?: string;
   created_at: string;
 }
@@ -120,6 +122,25 @@ export const api = {
       return response.json();
     } catch (err: any) {
       return handleFetchError(err, "audio extraction");
+    }
+  async ocrPhoto(file: File): Promise<{ text: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/ai/ocr-photo`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(parseBackendDetail(errData, "Failed to perform OCR on photo with AI"));
+      }
+
+      return response.json();
+    } catch (err: any) {
+      return handleFetchError(err, "photo OCR");
     }
   },
 
