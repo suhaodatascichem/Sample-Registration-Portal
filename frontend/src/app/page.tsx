@@ -40,7 +40,7 @@ export default function IntakeDashboard() {
       test_nir: s.test_nir,
       test_trp: s.test_trp,
       test_gaa: s.test_gaa,
-      contact_person: s.contact_person || submitterName || "Sheila"
+      contact_person: s.contact_person || "Sheila"
     }));
 
     // Append to existing rows
@@ -74,7 +74,7 @@ export default function IntakeDashboard() {
         test_nir: !!row.test_nir,
         test_trp: !!row.test_trp,
         test_gaa: !!row.test_gaa,
-        contact_person: row.contact_person || submitterName || "Sheila"
+        contact_person: row.contact_person || "Sheila"
       }));
 
       // 2. Call backend draft batch creation API

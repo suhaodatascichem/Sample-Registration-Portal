@@ -184,7 +184,7 @@ function ReviewAndConfirmContent() {
             setRowData={setRowData} 
             validationErrors={validationErrors}
             defaultMacNo={customerMacNo}
-            defaultContactPerson={submitterName || "Sheila"}
+            defaultContactPerson="Sheila"
           />
         </div>
 
