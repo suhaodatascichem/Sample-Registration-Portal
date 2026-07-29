@@ -10,6 +10,14 @@ class MaterialCodeEnum(str, Enum):
     FISH = "FISH"
     RUMINANT = "RUMINANT"
     PET = "PET"
+    SOYBEAN_MEAL = "SOYBEAN_MEAL"
+    CORN = "CORN"
+    WHEAT = "WHEAT"
+    PREMIX = "PREMIX"
+    RAW_MATERIAL = "RAW_MATERIAL"
+    CANOLA_MEAL = "CANOLA_MEAL"
+    PALM_KERNEL_MEAL = "PALM_KERNEL_MEAL"
+    RICE_BRAN = "RICE_BRAN"
     OTHER = "OTHER"
 
 SYNONYMS_MAP = {
@@ -59,28 +67,75 @@ SYNONYMS_MAP = {
     "canine": "PET",
     "feline": "PET",
     "puppy": "PET",
-    "kitten": "PET"
+    "kitten": "PET",
+
+    # SOYBEAN_MEAL synonyms
+    "soybean meal": "SOYBEAN_MEAL",
+    "soybean": "SOYBEAN_MEAL",
+    "soy meal": "SOYBEAN_MEAL",
+    "sbm": "SOYBEAN_MEAL",
+    "soy": "SOYBEAN_MEAL",
+
+    # CORN synonyms
+    "corn": "CORN",
+    "maize": "CORN",
+    "corn meal": "CORN",
+    "corn gluten": "CORN",
+    "cgm": "CORN",
+
+    # WHEAT synonyms
+    "wheat": "WHEAT",
+    "wheat bran": "WHEAT",
+    "wheat midds": "WHEAT",
+
+    # PREMIX synonyms
+    "premix": "PREMIX",
+    "vitamin": "PREMIX",
+    "mineral premix": "PREMIX",
+    "additive": "PREMIX",
+
+    # RAW_MATERIAL synonyms
+    "raw material": "RAW_MATERIAL",
+    "ingredient": "RAW_MATERIAL",
+    "feedstuff": "RAW_MATERIAL",
+
+    # CANOLA_MEAL synonyms
+    "canola": "CANOLA_MEAL",
+    "canola meal": "CANOLA_MEAL",
+
+    # PALM_KERNEL_MEAL synonyms
+    "palm kernel": "PALM_KERNEL_MEAL",
+    "palm kernel meal": "PALM_KERNEL_MEAL",
+    "pkm": "PALM_KERNEL_MEAL",
+
+    # RICE_BRAN synonyms
+    "rice bran": "RICE_BRAN",
 }
 
 def normalize_material_code(value: Any) -> str:
-    if not isinstance(value, str):
+    if not value or not isinstance(value, str):
         return "OTHER"
     
     clean_val = value.strip().lower()
+    if not clean_val:
+        return "OTHER"
+
     # Check exact match in synonyms
     if clean_val in SYNONYMS_MAP:
         return SYNONYMS_MAP[clean_val]
     
-    # Check partial match (e.g. "pig feed" -> PIG, "cow milk" -> RUMINANT)
+    # Check partial match (e.g. "soybean meal sample" -> SOYBEAN_MEAL, "pig feed" -> PIG)
     for synonym, standard in SYNONYMS_MAP.items():
         if synonym in clean_val:
             return standard
             
-    # Try direct enum matching
+    # Try direct enum matching or clean uppercase formatting
+    formatted_enum = clean_val.upper().replace(" ", "_")
     try:
-        return MaterialCodeEnum(value.upper()).value
+        return MaterialCodeEnum(formatted_enum).value
     except ValueError:
-        return "OTHER"
+        # Return cleaned uppercase representation for custom raw materials/types
+        return formatted_enum
 
 # Base schemas
 class CustomerBase(BaseModel):

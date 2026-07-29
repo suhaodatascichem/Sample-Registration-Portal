@@ -72,16 +72,16 @@ class AIService:
                 "You are an expert laboratory sample intake AI assistant.\n"
                 "Your job is to parse text notes, emails, or voice transcripts and extract lab samples into a structured JSON schema.\n"
                 "Guidelines:\n"
-                "1. RANGE & COUNT EXPANSION: If the text specifies multiple samples by count or ID range (e.g. '4 broiler grower samples... descriptions 1001 to 1004'), expand them into individual sample items (e.g. 1001, 1002, 1003, 1004).\n"
+                "1. RANGE & COUNT EXPANSION: If the text specifies multiple samples by count or ID range (e.g. '4 broiler grower samples... descriptions 1001 to 1004', '2 soybean meal samples'), expand them into individual sample items.\n"
                 "2. CUSTOMER / SUBMITTER: Extract company name and/or contact person (e.g., 'Japfa Indonesia (Sheila)').\n"
-                "3. MATERIAL CODES: Standardize and map material/animal types to BROILER, PIG, FISH, RUMINANT, PET, or OTHER.\n"
+                "3. MATERIAL CODES: Standardize and map material types to BROILER, PIG, FISH, RUMINANT, PET, SOYBEAN_MEAL, CORN, WHEAT, PREMIX, RAW_MATERIAL, or standard UPPERCASE material code (e.g. CANOLA_MEAL).\n"
                 "4. TEST FLAGS: Identify requested tests and set boolean flags:\n"
                 "   - test_total_aa (Total Amino Acids, total AA)\n"
                 "   - test_supp_aa (Supplemental Amino Acids, free AA, supp AA)\n"
                 "   - test_nir (NIR, near infrared)\n"
                 "   - test_trp (Tryptophan, Trp)\n"
                 "   - test_gaa (GAA, guanidinoacetic acid)\n"
-                "5. Apply requested test flags across all corresponding samples."
+                "5. Apply requested test flags across all corresponding samples. If no specific tests are explicitly named or generic terms like 'required tests' or 'all tests' are mentioned, set test_total_aa and test_nir to true so that at least one test is active."
             )
 
             try:
@@ -132,7 +132,7 @@ class AIService:
             system_prompt = (
                 "You are a laboratory sample OCR and extraction assistant. You analyze images of sample intake sheets, handwritten manifests, or labels.\n"
                 "Your task is to extract all samples listed in the image into structured data.\n"
-                "Standardize material/animal codes to: BROILER, PIG, FISH, RUMINANT, PET, or OTHER.\n"
+                "Standardize material codes to: BROILER, PIG, FISH, RUMINANT, PET, SOYBEAN_MEAL, CORN, WHEAT, PREMIX, RAW_MATERIAL, or standard UPPERCASE material code.\n"
                 "Identify requested tests:\n"
                 "- test_total_aa (Total Amino Acids)\n"
                 "- test_supp_aa (Supplemental Amino Acids)\n"
@@ -172,91 +172,55 @@ class AIService:
 
     @staticmethod
     def _get_mock_batch_from_text(text: str) -> ExtractedBatch:
-        # Very simple keyword checking mock parser
-        samples = []
-        if "japfa" in text.lower():
+        import re
+        from app.schemas import normalize_material_code
+
+        lowered = text.lower()
+        customer_name = "Agri-Nutrition Labs"
+        if "japfa" in lowered:
             customer_name = "Japfa Indonesia (Sheila)"
-            return ExtractedBatch(
-                customer_name=customer_name,
-                samples=[
-                    ExtractedSample(
-                        customer_name=customer_name,
-                        material_code="BROILER",
-                        sample_description="Broiler grower feed 1001",
-                        test_total_aa=True,
-                        test_supp_aa=True,
-                        test_trp=True
-                    ),
-                    ExtractedSample(
-                        customer_name=customer_name,
-                        material_code="BROILER",
-                        sample_description="Broiler grower feed 1002",
-                        test_total_aa=True,
-                        test_supp_aa=True,
-                        test_trp=True
-                    ),
-                    ExtractedSample(
-                        customer_name=customer_name,
-                        material_code="BROILER",
-                        sample_description="Broiler grower feed 1003",
-                        test_total_aa=True,
-                        test_supp_aa=True,
-                        test_trp=True
-                    ),
-                    ExtractedSample(
-                        customer_name=customer_name,
-                        material_code="BROILER",
-                        sample_description="Broiler grower feed 1004",
-                        test_total_aa=True,
-                        test_supp_aa=True,
-                        test_trp=True
-                    ),
-                ]
-            )
-
-        if "smith" in text.lower():
+        elif "smith" in lowered:
             customer_name = "Smith Farm"
-        
-        # Look for broiler / chicken
-        if "broiler" in text.lower() or "chicken" in text.lower():
-            samples.append(
-                ExtractedSample(
-                    customer_name=customer_name,
-                    material_code="BROILER",
-                    sample_description="Broiler grower feed finisher batch",
-                    test_total_aa=True,
-                    test_nir=True
-                )
-            )
-        
-        # Look for pig / swine
-        if "pig" in text.lower() or "swine" in text.lower():
-            samples.append(
-                ExtractedSample(
-                    customer_name=customer_name,
-                    material_code="PIG",
-                    sample_description="Piglet starter feed premium",
-                    test_nir=True,
-                    test_gaa=True
-                )
-            )
 
-        if not samples:
-            # Return a default list if nothing matches
-            samples = [
+        # Check count of samples
+        count_match = re.search(r'(\d+)\s+([a-zA-Z0-9_\s]+?)\s+samples?', lowered)
+        if count_match:
+            count = int(count_match.group(1))
+            mat_raw = count_match.group(2).strip()
+            material_code = normalize_material_code(mat_raw)
+        else:
+            # Fallback count parsing
+            num_match = re.search(r'(\d+)', lowered)
+            count = int(num_match.group(1)) if num_match else 2
+            material_code = normalize_material_code(text)
+
+        # Detect tests requested
+        test_total_aa = any(k in lowered for k in ["total aa", "amino acid", "total amino", "aa"])
+        test_supp_aa = any(k in lowered for k in ["supp aa", "free aa", "supplemental"])
+        test_nir = "nir" in lowered or "near infrared" in lowered
+        test_trp = "trp" in lowered or "tryptophan" in lowered
+        test_gaa = "gaa" in lowered or "guanidino" in lowered
+
+        # Default tests if none explicitly named or generic "required tests" specified
+        if not any([test_total_aa, test_supp_aa, test_nir, test_trp, test_gaa]) or "required test" in lowered:
+            test_total_aa = True
+            test_nir = True
+
+        mat_display = material_code.replace("_", " ").title()
+        samples = []
+        for i in range(1, count + 1):
+            samples.append(
                 ExtractedSample(
                     customer_name=customer_name,
-                    material_code="BROILER",
-                    sample_description="Sample feed A - voice input mock",
-                    test_total_aa=True
-                ),
-                ExtractedSample(
-                    customer_name=customer_name,
-                    material_code="RUMINANT",
-                    sample_description="Silage sample B - voice input mock",
-                    test_nir=True
+                    material_code=material_code,
+                    sample_description=f"{mat_display} sample #{i:03d}",
+                    test_total_aa=test_total_aa,
+                    test_supp_aa=test_supp_aa,
+                    test_nir=test_nir,
+                    test_trp=test_trp,
+                    test_gaa=test_gaa,
                 )
-            ]
+            )
 
         return ExtractedBatch(customer_name=customer_name, samples=samples)
 

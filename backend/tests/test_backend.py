@@ -11,9 +11,27 @@ def test_material_code_normalization():
     assert normalize_material_code("fish feed") == "FISH"
     assert normalize_material_code("dairy cow") == "RUMINANT"
     assert normalize_material_code("cat") == "PET"
-    assert normalize_material_code("unknown item") == "OTHER"
+    assert normalize_material_code("soybean meal") == "SOYBEAN_MEAL"
+    assert normalize_material_code("soybean") == "SOYBEAN_MEAL"
+    assert normalize_material_code("corn meal") == "CORN"
+    assert normalize_material_code("wheat") == "WHEAT"
+    assert normalize_material_code("canola meal") == "CANOLA_MEAL"
     assert normalize_material_code("") == "OTHER"
     assert normalize_material_code(None) == "OTHER"
+
+def test_mock_text_extraction_soybean_meal():
+    from app.services.ai_service import AIService
+    batch = AIService.extract_structured_data("2 soybean meal samples, descriptions and required tests")
+    assert len(batch.samples) == 2
+    assert batch.samples[0].material_code == "SOYBEAN_MEAL"
+    assert batch.samples[1].material_code == "SOYBEAN_MEAL"
+    assert any([
+        batch.samples[0].test_total_aa,
+        batch.samples[0].test_supp_aa,
+        batch.samples[0].test_nir,
+        batch.samples[0].test_trp,
+        batch.samples[0].test_gaa
+    ])
 
 def test_sample_validation_success():
     # Valid sample with 1 test

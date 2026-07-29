@@ -18,7 +18,19 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
   const gridRef = useRef<AgGridReact | null>(null);
 
   // Material dropdown options
-  const materials = ["BROILER", "PIG", "FISH", "RUMINANT", "PET", "OTHER"];
+  const materials = [
+    "BROILER",
+    "PIG",
+    "FISH",
+    "RUMINANT",
+    "PET",
+    "SOYBEAN_MEAL",
+    "CORN",
+    "WHEAT",
+    "PREMIX",
+    "RAW_MATERIAL",
+    "OTHER"
+  ];
 
   // Custom keydown handler for Copy-Paste support in AG Grid Community
   const onCellKeyDown = (event: CellKeyDownEvent) => {
