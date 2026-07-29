@@ -10,9 +10,11 @@ if db_url.startswith("postgres://"):
 
 try:
     engine = create_engine(db_url, echo=False, pool_pre_ping=True)
+    with engine.connect() as conn:
+        pass
 except Exception as e:
-    logger.error(f"Failed to connect to primary DB ({db_url}): {e}. Falling back to SQLite.")
-    engine = create_engine("sqlite:///./fallback.db", echo=False)
+    logger.warning(f"Failed to connect to primary DB ({db_url}): {e}. Falling back to SQLite.")
+    engine = create_engine("sqlite:///./fallback.db", echo=False, pool_pre_ping=True)
 
 def init_db():
     try:
