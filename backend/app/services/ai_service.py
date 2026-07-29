@@ -46,20 +46,25 @@ class AIService:
                 mime_type = f"audio/{ext.replace('.', '')}"
 
             audio_part = types.Part.from_bytes(data=audio_bytes, mime_type=mime_type)
+            transcription_prompt = (
+                "Listen to this audio recording (which may be spoken in any language, e.g. English, Bahasa Indonesia, Chinese, Spanish, Vietnamese, Thai, Malay, etc.). "
+                "Transcribe and translate/format it into clean, tidy, structured English sample intake notes suitable for a laboratory sample intake log. "
+                "Organize customer names, sample descriptions, material types (e.g. soybean meal, broiler feed, corn, wheat), sample counts, and requested tests (e.g. Total AA, NIR, Supp AA, Trp, GAA) into clear, readable sentences."
+            )
             try:
                 response = client.models.generate_content(
                     model="gemini-flash-latest",
-                    contents=[audio_part, "Transcribe this audio recording into clear text."]
+                    contents=[audio_part, transcription_prompt]
                 )
             except Exception:
                 response = client.models.generate_content(
                     model="gemini-2.0-flash",
-                    contents=[audio_part, "Transcribe this audio recording into clear text."]
+                    contents=[audio_part, transcription_prompt]
                 )
             return response.text or ""
         except Exception as e:
             logger.warning(f"Gemini audio transcription failed ({e}). Falling back to offline mock transcript.")
-            return "Please register 2 soybean meal samples for Japfa Indonesia. We need Total Amino Acids and NIR tests."
+            return "Customer: Japfa Indonesia\nRequest: 2 soybean meal samples\nTests: Total Amino Acids and NIR tests"
 
     @classmethod
     def extract_structured_data(cls, text: str) -> ExtractedBatch:

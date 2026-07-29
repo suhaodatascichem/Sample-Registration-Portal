@@ -80,9 +80,28 @@ function parseBackendDetail(errData: any, defaultMsg: string): string {
     return errData.detail.message;
   }
   return JSON.stringify(errData.detail);
-}
-
 export const api = {
+  async transcribeAudio(file: File): Promise<{ text: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/ai/transcribe-audio`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(parseBackendDetail(errData, "Failed to transcribe audio with AI"));
+      }
+
+      return response.json();
+    } catch (err: any) {
+      return handleFetchError(err, "audio transcription");
+    }
+  },
+
   async processAudio(file: File): Promise<ExtractedBatch> {
     const formData = new FormData();
     formData.append("file", file);

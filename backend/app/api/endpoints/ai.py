@@ -7,15 +7,14 @@ from app.schemas import ExtractedBatch, TextInput
 
 router = APIRouter()
 
-@router.post("/process-audio", response_model=ExtractedBatch)
-async def process_audio(file: UploadFile = File(...)):
-    # Verify file extension
+from pydantic import BaseModel
+
+class AudioTranscriptResponse(BaseModel):
+    text: str
+
+@router.post("/transcribe-audio", response_model=AudioTranscriptResponse)
+async def transcribe_audio(file: UploadFile = File(...)):
     ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
-    if ext not in [".wav", ".mp3", ".webm", ".m4a", ".ogg"]:
-        # Standard warning, but we still allow trying if we want
-        pass
-        
-    # Write to a temp file
     try:
         suffix = ext if ext else ".webm"
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
@@ -23,13 +22,35 @@ async def process_audio(file: UploadFile = File(...)):
             temp_path = temp_file.name
 
         try:
-            # 1. Transcribe audio to text
             transcript_text = AIService.transcribe_audio(temp_path)
-            # 2. Extract structured data from transcribed text
+            return {"text": transcript_text}
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error transcribing audio with AI: {str(e)}"
+        )
+
+@router.post("/process-audio", response_model=ExtractedBatch)
+async def process_audio(file: UploadFile = File(...)):
+    # Verify file extension
+    ext = os.path.splitext(file.filename)[1].lower() if file.filename else ""
+    if ext not in [".wav", ".mp3", ".webm", ".m4a", ".ogg"]:
+        pass
+        
+    try:
+        suffix = ext if ext else ".webm"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+            shutil.copyfileobj(file.file, temp_file)
+            temp_path = temp_file.name
+
+        try:
+            transcript_text = AIService.transcribe_audio(temp_path)
             extracted_batch = AIService.extract_structured_data(transcript_text)
             return extracted_batch
         finally:
-            # Cleanup temp file
             if os.path.exists(temp_path):
                 os.remove(temp_path)
                 

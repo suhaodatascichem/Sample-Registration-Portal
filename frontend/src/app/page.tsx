@@ -15,11 +15,18 @@ export default function IntakeDashboard() {
   const [companyName, setCompanyName] = useState("");
   const [submitterName, setSubmitterName] = useState("");
   const [customerMacNo, setCustomerMacNo] = useState("");
+  const [textIntakeValue, setTextIntakeValue] = useState("");
   const [rowData, setRowData] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Callback when AI extracts a batch from audio, photo, or text
+  // Callback when Voice Intake transcribes and formats regional speech
+  const handleVoiceTranscription = (transcriptText: string) => {
+    setErrorMsg(null);
+    setTextIntakeValue((prev) => (prev ? `${prev}\n\n${transcriptText}` : transcriptText));
+  };
+
+  // Callback when AI extracts a batch from photo or text
   const handleAIExtraction = (data: ExtractedBatch) => {
     setErrorMsg(null);
     if (data.customer_name) {
@@ -157,6 +164,8 @@ export default function IntakeDashboard() {
         {/* Left Side: Text Intake (Primary & Larger Window) */}
         <div className="lg:col-span-7 flex flex-col">
           <TextIntake 
+            textValue={textIntakeValue}
+            setTextValue={setTextIntakeValue}
             onExtractionSuccess={handleAIExtraction} 
             onError={handleManualError} 
           />
@@ -165,7 +174,7 @@ export default function IntakeDashboard() {
         {/* Right Side: Voice Intake & Photo Scanner (Stacked Vertically) */}
         <div className="lg:col-span-5 flex flex-col gap-6 justify-between">
           <AudioRecorder 
-            onExtractionSuccess={handleAIExtraction} 
+            onTranscriptionSuccess={handleVoiceTranscription} 
             onError={handleManualError} 
           />
           

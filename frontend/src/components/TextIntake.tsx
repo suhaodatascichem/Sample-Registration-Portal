@@ -5,6 +5,8 @@ import { FileText, Sparkles, Loader2, Trash2, CopyCheck } from "lucide-react";
 import { api, ExtractedBatch } from "@/utils/api";
 
 interface TextIntakeProps {
+  textValue?: string;
+  setTextValue?: (text: string) => void;
   onExtractionSuccess: (data: ExtractedBatch) => void;
   onError: (error: string) => void;
 }
@@ -20,8 +22,11 @@ const EXAMPLES = [
   },
 ];
 
-export default function TextIntake({ onExtractionSuccess, onError }: TextIntakeProps) {
-  const [text, setText] = useState("");
+export default function TextIntake({ textValue, setTextValue, onExtractionSuccess, onError }: TextIntakeProps) {
+  const [internalText, setInternalText] = useState("");
+
+  const text = textValue !== undefined ? textValue : internalText;
+  const setText = setTextValue || setInternalText;
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleExtract = async () => {

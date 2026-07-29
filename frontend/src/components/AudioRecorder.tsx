@@ -5,11 +5,11 @@ import { Mic, Square, Loader2, Volume2, AlertCircle } from "lucide-react";
 import { api, ExtractedBatch } from "@/utils/api";
 
 interface AudioRecorderProps {
-  onExtractionSuccess: (data: ExtractedBatch) => void;
+  onTranscriptionSuccess: (text: string) => void;
   onError: (error: string) => void;
 }
 
-export default function AudioRecorder({ onExtractionSuccess, onError }: AudioRecorderProps) {
+export default function AudioRecorder({ onTranscriptionSuccess, onError }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -98,8 +98,8 @@ export default function AudioRecorder({ onExtractionSuccess, onError }: AudioRec
     setIsProcessing(true);
     try {
       const file = new File([blob], "recording.webm", { type: "audio/webm" });
-      const data = await api.processAudio(file);
-      onExtractionSuccess(data);
+      const result = await api.transcribeAudio(file);
+      onTranscriptionSuccess(result.text);
     } catch (err: any) {
       onError(err.message || "Failed to process audio registration.");
     } finally {
@@ -122,7 +122,7 @@ export default function AudioRecorder({ onExtractionSuccess, onError }: AudioRec
       <div className="w-full text-center mt-2">
         <h3 className="text-lg font-semibold text-slate-100 font-outfit">Voice Intake</h3>
         <p className="text-xs text-slate-400 mt-1">
-          Record batch info: Customer name, materials, and tests requested.
+          Speak in any regional language — transcribes directly into Text Intake box.
         </p>
       </div>
 
@@ -139,10 +139,10 @@ export default function AudioRecorder({ onExtractionSuccess, onError }: AudioRec
         ) : isProcessing ? (
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="w-6 h-6 text-brand-400 animate-spin" />
-            <span className="text-xs font-semibold text-brand-300 animate-pulse">Whisper transcribing...</span>
+            <span className="text-xs font-semibold text-brand-300 animate-pulse">Multilingual AI Transcribing...</span>
           </div>
         ) : (
-          <p className="text-sm text-slate-500 font-medium">Click Record to describe samples orally</p>
+          <p className="text-sm text-slate-500 font-medium">Click Record to speak sample notes orally</p>
         )}
       </div>
 
