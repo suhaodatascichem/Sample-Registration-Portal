@@ -154,26 +154,13 @@ function ReviewAndConfirmContent() {
 
             <div className="flex flex-col gap-1.5 flex-1 w-full">
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Submitter Name
+                Submitter Name / Email
               </label>
               <input
                 type="text"
                 value={submitterName}
                 onChange={(e) => setSubmitterName(e.target.value)}
-                placeholder="e.g. John Doe"
-                className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5 flex-1 w-full">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Customer Mac. no
-              </label>
-              <input
-                type="text"
-                value={customerMacNo}
-                onChange={(e) => setCustomerMacNo(e.target.value)}
-                placeholder="e.g. MAC-8821"
+                placeholder="e.g. Sheila (sheila@example.com)"
                 className="px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-white text-sm font-semibold transition-all"
               />
             </div>

@@ -14,22 +14,37 @@ export default function IntakeDashboard() {
   
   const [companyName, setCompanyName] = useState("");
   const [submitterName, setSubmitterName] = useState("");
-  const [customerMacNo, setCustomerMacNo] = useState("");
   const [textIntakeValue, setTextIntakeValue] = useState("");
+  const [voiceCount, setVoiceCount] = useState(0);
+  const [photoCount, setPhotoCount] = useState(0);
   const [rowData, setRowData] = useState<any[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Reset sequence counters when text is completely cleared
+  React.useEffect(() => {
+    if (!textIntakeValue.trim()) {
+      setVoiceCount(0);
+      setPhotoCount(0);
+    }
+  }, [textIntakeValue]);
+
   // Callback when Voice Intake transcribes and formats regional speech
   const handleVoiceTranscription = (transcriptText: string) => {
     setErrorMsg(null);
-    setTextIntakeValue((prev) => (prev ? `${prev}\n\n${transcriptText}` : transcriptText));
+    const nextCount = voiceCount + 1;
+    setVoiceCount(nextCount);
+    const entry = `Voice ${nextCount} (${transcriptText})`;
+    setTextIntakeValue((prev) => (prev.trim() ? `${prev}\n\n${entry}` : entry));
   };
 
   // Callback when Photo Scanner performs OCR on handwritten or sheet photos
   const handlePhotoOCR = (ocrText: string) => {
     setErrorMsg(null);
-    setTextIntakeValue((prev) => (prev ? `${prev}\n\n${ocrText}` : ocrText));
+    const nextCount = photoCount + 1;
+    setPhotoCount(nextCount);
+    const entry = `Photo ${nextCount} (${ocrText})`;
+    setTextIntakeValue((prev) => (prev.trim() ? `${prev}\n\n${entry}` : entry));
   };
 
   // Callback when AI extracts a batch from text intake notes
@@ -38,13 +53,10 @@ export default function IntakeDashboard() {
     if (data.customer_name) {
       setCompanyName(data.customer_name);
     }
-    if (data.customer_mac_no) {
-      setCustomerMacNo(data.customer_mac_no);
-    }
     
     // Convert extracted samples into row data format
     const newRows = data.samples.map((s) => ({
-      mac_no: s.mac_no || data.customer_mac_no || customerMacNo || "",
+      mac_no: s.mac_no || "",
       customer_name: s.customer_name || data.customer_name || companyName || "",
       material_code: s.material_code || "OTHER",
       sample_description: s.sample_description || "",
@@ -80,7 +92,7 @@ export default function IntakeDashboard() {
     try {
       // 1. Map row data to the API sample creation payload
       const samplesPayload = rowData.map((row) => ({
-        mac_no: row.mac_no || customerMacNo || "",
+        mac_no: row.mac_no || "",
         material_code: row.material_code || "OTHER",
         sample_description: row.sample_description || "Unnamed sample",
         test_total_aa: !!row.test_total_aa,
@@ -93,7 +105,7 @@ export default function IntakeDashboard() {
       }));
 
       // 2. Call backend draft batch creation API
-      const batch = await api.createBatch(companyName, customerMacNo, submitterName, samplesPayload);
+      const batch = await api.createBatch(companyName, "", submitterName, samplesPayload);
       
       // 3. Route to the review page
       router.push(`/review?batch_id=${batch.id}`);
@@ -109,17 +121,9 @@ export default function IntakeDashboard() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-500/10 text-brand-400 border border-brand-500/20">
-              Lab Intake Portal • 2-Step Multimodal Intake
-            </span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight mt-2 font-outfit">
+          <h1 className="text-3xl font-extrabold text-white tracking-tight font-outfit">
             Sample Intake & Registration
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Capture sample details via voice or photo (Step 1), then review & extract structured tables (Step 2).
-          </p>
         </div>
       </div>
 
@@ -129,7 +133,7 @@ export default function IntakeDashboard() {
           <Sparkles className="w-4 h-4 text-brand-400" /> Batch Identification Details
         </h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-2">
               Customer / Company Name <span className="text-red-400">*</span>
@@ -145,26 +149,13 @@ export default function IntakeDashboard() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-2">
-              Submitter / Contact Person
+              Submitter Name / Email
             </label>
             <input
               type="text"
               value={submitterName}
               onChange={(e) => setSubmitterName(e.target.value)}
-              placeholder="e.g. Sheila (Lab Officer)"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-slate-100 placeholder-slate-500 text-sm transition-all"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-2">
-              Default Machine / Mac No.
-            </label>
-            <input
-              type="text"
-              value={customerMacNo}
-              onChange={(e) => setCustomerMacNo(e.target.value)}
-              placeholder="e.g. MAC-9941"
+              placeholder="e.g. Sheila (sheila@example.com)"
               className="w-full px-4 py-2.5 rounded-xl bg-slate-950/60 border border-white/10 hover:border-brand-500/30 focus:border-brand-500 focus:outline-none text-slate-100 placeholder-slate-500 text-sm transition-all"
             />
           </div>
@@ -209,7 +200,7 @@ export default function IntakeDashboard() {
         <SampleGrid 
           rowData={rowData} 
           setRowData={setRowData} 
-          defaultMacNo={customerMacNo}
+          defaultMacNo=""
           defaultContactPerson="Sheila"
         />
         
