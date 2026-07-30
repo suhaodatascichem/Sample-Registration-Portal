@@ -27,3 +27,9 @@ Thumbs.db
 .idea/
 *.swp
 *.bak
+
+# Company Confidential / Local Strategy Documents
+evonik_sample_registration_strategy.md
+*.strategy.md
+evonik_*
+
