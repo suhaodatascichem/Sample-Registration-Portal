@@ -117,9 +117,9 @@ export default function IntakeDashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8 font-inter">
+    <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-5 font-inter">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight font-outfit">
             Sample Intake & Registration
@@ -129,10 +129,6 @@ export default function IntakeDashboard() {
 
       {/* Top Banner: Primary Batch Identification Details */}
       <div className="glass-panel rounded-3xl p-6 shadow-xl">
-        <h2 className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-4 flex items-center gap-2 font-outfit">
-          <Sparkles className="w-4 h-4 text-brand-400" /> Batch Identification Details
-        </h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-2">
