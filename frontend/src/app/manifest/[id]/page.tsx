@@ -136,20 +136,33 @@ export default function ShippingManifest() {
             </div>
           </div>
 
-          {/* QR Code Segment */}
-          <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white border border-slate-200 shadow-md w-fit self-center">
-            {batch.manifest_qr_code ? (
-              <QRCodeSVG 
-                value={batch.manifest_qr_code} 
-                size={140}
-                level="M"
-                includeMargin={false}
-              />
-            ) : (
-              <div className="w-32 h-32 bg-slate-100 flex items-center justify-center text-xs text-slate-400">QR Code Error</div>
-            )}
-            <span className="text-[9px] font-mono text-slate-500 tracking-wider">SCAN AT LAB RECEIVING</span>
-          </div>
+          {/* QR Code Segment - Encodes full web link URL */}
+          {(() => {
+            const qrWebLink = typeof window !== "undefined"
+              ? `${window.location.origin}/manifest/${batch.id}`
+              : `/manifest/${batch.id}`;
+            
+            return (
+              <div className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white border border-slate-200 shadow-md w-fit self-center">
+                <QRCodeSVG 
+                  value={qrWebLink} 
+                  size={140}
+                  level="M"
+                  includeMargin={false}
+                />
+                <a 
+                  href={qrWebLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[9px] font-mono text-brand-600 hover:underline max-w-[150px] text-center truncate font-bold"
+                  title={qrWebLink}
+                >
+                  {qrWebLink}
+                </a>
+                <span className="text-[9px] font-mono text-slate-500 tracking-wider">SCAN TO OPEN WEB PAGE</span>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Samples Table */}

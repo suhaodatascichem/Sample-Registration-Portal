@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle, AlertCircle, Loader2, RefreshCw, Printer } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle, Loader2, RefreshCw, QrCode } from "lucide-react";
 import Link from "next/link";
+import { QRCodeSVG } from "qrcode.react";
 import SampleGrid from "@/components/SampleGrid";
 import { api, SubmissionBatch } from "@/utils/api";
 
@@ -205,6 +206,38 @@ function ReviewAndConfirmContent() {
               <span className="font-semibold text-slate-200">{rowData.length}</span>
             </div>
           </div>
+          {/* Live Page Web Link QR Code */}
+          {batchId && (
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-2.5">
+              <div className="flex items-center justify-between text-xs text-slate-300 font-bold w-full">
+                <div className="flex items-center gap-1.5">
+                  <QrCode className="w-3.5 h-3.5 text-brand-400" />
+                  <span>Web Link QR Code</span>
+                </div>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300">Live URL</span>
+              </div>
+              <div className="p-2.5 bg-white rounded-xl shadow-md">
+                <QRCodeSVG 
+                  value={typeof window !== "undefined" ? `${window.location.origin}/review?batch_id=${batchId}` : `/review?batch_id=${batchId}`}
+                  size={120}
+                  level="M"
+                  includeMargin={false}
+                />
+              </div>
+              <a
+                href={typeof window !== "undefined" ? `${window.location.origin}/review?batch_id=${batchId}` : `/review?batch_id=${batchId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] font-mono text-brand-400 hover:underline max-w-[200px] truncate text-center font-semibold"
+                title={typeof window !== "undefined" ? `${window.location.origin}/review?batch_id=${batchId}` : `/review?batch_id=${batchId}`}
+              >
+                {typeof window !== "undefined" ? `${window.location.origin}/review?batch_id=${batchId}` : `/review?batch_id=${batchId}`}
+              </a>
+              <span className="text-[9px] text-slate-400 text-center">
+                Scan with phone camera or QR scanner to open page link
+              </span>
+            </div>
+          )}
 
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-slate-400 flex flex-col gap-2">
             <h4 className="font-bold text-slate-300">Mandatory Rules Checklist</h4>

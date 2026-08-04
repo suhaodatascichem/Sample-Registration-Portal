@@ -216,17 +216,8 @@ def submit_batch(batch_id: uuid.UUID, db: Session = Depends(get_session)):
     # Update status and generate a printable QR manifest code containing manifest JSON payload
     batch.status = "submitted"
     
-    # Manifest QR payload contains batch ID, sequential number, Customer name, sample list, and submission timestamp
-    manifest_data = {
-        "manifest_type": "LAB_SAMPLE_INTAKE",
-        "batch_id": str(batch.id),
-        "batch_number": batch.batch_number,
-        "customer": customer.name,
-        "submitter": batch.submitter_name,
-        "sample_count": len(batch.samples),
-        "timestamp": batch.created_at.isoformat()
-    }
-    batch.manifest_qr_code = json.dumps(manifest_data)
+    # Manifest QR code stores the web link URL path for instant scanning & opening in browser
+    batch.manifest_qr_code = f"/manifest/{batch.id}"
     db.add(batch)
     
     # Audit log
