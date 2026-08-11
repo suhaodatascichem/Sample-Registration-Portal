@@ -229,6 +229,22 @@ class AIService:
         elif "smith" in lowered:
             customer_name = "Smith Farm"
 
+        # Check variety
+        variety_match = re.search(r'variety\s+([a-zA-Z0-9_\s]+?)(?:,|\.|$|\s+series|\s+location)', lowered) or re.search(r'sorte\s+([a-zA-Z0-9_\s]+?)(?:,|\.|$)', lowered)
+        variety = variety_match.group(1).strip().title() if variety_match else None
+
+        # Check series
+        series_match = re.search(r'series\s+([a-zA-Z0-9_]+)', lowered) or re.search(r'serie\s+([a-zA-Z0-9_]+)', lowered)
+        series = series_match.group(1).strip() if series_match else None
+
+        # Check location
+        location_match = re.search(r'location\s+([a-zA-Z0-9_\s]+?)(?:,|\.|$)', lowered) or re.search(r'ort\s+([a-zA-Z0-9_\s]+?)(?:,|\.|$)', lowered)
+        location_city = location_match.group(1).strip().title() if location_match else None
+
+        # Check harvest year
+        year_match = re.search(r'(?:harvest\s+year|erntejahr)\s+(\d{4})', lowered) or re.search(r'\b(202\d)\b', lowered)
+        harvest_year = int(year_match.group(1)) if year_match else None
+
         # Check count of samples
         count_match = re.search(r'(\d+)\s+([a-zA-Z0-9_\s]+?)\s+samples?', lowered)
         if count_match:
@@ -257,11 +273,16 @@ class AIService:
         mat_display = material_code.replace("_", " ").title()
         samples = []
         for i in range(1, count + 1):
+            sample_desc = f"{variety} sample #{i:03d}" if variety else f"{mat_display} sample #{i:03d}"
             samples.append(
                 ExtractedSample(
                     customer_name=customer_name,
                     material_code=material_code,
-                    sample_description=f"{mat_display} sample #{i:03d}",
+                    variety=variety,
+                    series=series,
+                    location_city=location_city,
+                    harvest_year=harvest_year,
+                    sample_description=sample_desc,
                     test_total_aa=test_total_aa,
                     test_supp_aa=test_supp_aa,
                     test_nir=test_nir,
