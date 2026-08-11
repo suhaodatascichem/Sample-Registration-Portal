@@ -29,9 +29,38 @@ class Sample(SQLModel, table=True):
     __tablename__ = "samples"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     batch_id: uuid.UUID = Field(foreign_key="submission_batches.id", index=True)
+    
+    # System & Auto-Generated Identifiers
+    lab_sample_id: Optional[str] = Field(default=None, index=True)   # ProbenID Labor / SampleID Lab (e.g. GK2506941)
+    ag_sample_id: Optional[str] = Field(default=None, index=True)    # ProbenID AG / SampleID AG (Barcode ID)
     mac_no: Optional[str] = Field(default=None)
-    material_code: str  # Enum: BROILER, PIG, FISH, RUMINANT, PET, OTHER
-    sample_description: str
+    
+    # Customer Input Business Fields
+    variety: Optional[str] = Field(default=None)                      # Sorte / Type
+    assortment_code: Optional[str] = Field(default=None)             # Sortiment / Assortment
+    series: Optional[str] = Field(default=None)                      # Serie / Series
+    country: Optional[str] = Field(default="Deutschland")             # Land / Country
+    state_region: Optional[str] = Field(default=None)                # B-Land / Federal state
+    location_city: Optional[str] = Field(default=None)               # Ort / City
+    sowing_year: Optional[int] = Field(default=None)                  # Ansaatjahr / Year of sowing
+    harvest_year: Optional[int] = Field(default=None)                 # Erntejahr / Harvest year
+    harvest_year_code: Optional[str] = Field(default=None)            # NJ / NJ
+    location_remark: Optional[str] = Field(default=None)              # Standort-Hinweis / Location remarks
+    customer_notes: Optional[str] = Field(default=None)               # Notiz / Note
+    
+    # Lab / Measured Quality Metrics (Optional from Customer)
+    sedimentation_value_ml: Optional[float] = Field(default=None)     # Sedimentationswert (ml)
+    grain_hardness: Optional[float] = Field(default=None)             # Korn-Härte (--)
+    falling_number_sec: Optional[float] = Field(default=None)         # Fallzahl Korn (s)
+    
+    # System / LIMS Presets
+    material_code: str = Field(default="RMWHEA01")                    # Material (e.g. BROILER, WHEAT, RMWHEA01)
+    test_plan: Optional[str] = Field(default="Raw Materials NIR R Cereals") # Testplan / Test plan
+    mac_code: Optional[str] = Field(default="11550")                   # MAC / MAC
+    lab_customer_id: Optional[str] = Field(default="61063")           # Lab Customer
+    
+    # Test flags
+    sample_description: str = Field(default="Sample")
     test_total_aa: bool = Field(default=False)
     test_supp_aa: bool = Field(default=False)
     test_nir: bool = Field(default=False)

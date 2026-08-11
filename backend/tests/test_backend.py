@@ -70,7 +70,7 @@ def test_sample_validation_fail_empty_desc():
             test_total_aa=True
         )
 
-def test_lims_csv_export():
+def test_lims_csv_export_22_columns():
     import uuid
     batch_id = uuid.uuid4()
     cust_id = uuid.uuid4()
@@ -88,36 +88,45 @@ def test_lims_csv_export():
         Sample(
             id=uuid.uuid4(),
             batch_id=batch_id,
-            material_code="BROILER",
-            sample_description="Sample 1",
-            test_total_aa=True,
-            test_nir=True
-        ),
-        Sample(
-            id=uuid.uuid4(),
-            batch_id=batch_id,
-            material_code="PIG",
-            sample_description="Sample 2",
-            test_supp_aa=True,
-            test_gaa=True
+            lab_sample_id="GK2506941",
+            ag_sample_id="343686001002019016",
+            variety="Axioma",
+            assortment_code="43686",
+            series="102",
+            country="Deutschland",
+            state_region="Bayern",
+            location_city="Greimersdorf",
+            sowing_year=2024,
+            harvest_year=2025,
+            sedimentation_value_ml=75,
+            grain_hardness=63,
+            falling_number_sec=458,
+            material_code="RMWHEA01",
+            test_plan="Raw Materials NIR R Cereals",
+            mac_code="11550",
+            lab_customer_id="61063"
         )
     ]
     
-    csv_str = ExportService.generate_lims_csv(batch, customer, samples)
-    lines = csv_str.strip().split("\r\n") if "\r\n" in csv_str else csv_str.strip().split("\n")
+    # Test German Export
+    csv_de = ExportService.generate_lims_csv(batch, customer, samples, lang="de")
+    lines_de = csv_de.strip().split("\r\n") if "\r\n" in csv_de else csv_de.strip().split("\n")
+    assert "Nr.;ProbenID Labor;ProbenID AG;Sorte;Sortiment;Serie;Land ;B-Land;Ort;Ansaatjahr;Erntejahr;NJ;Standort-Hinweis;Sedimentationswert (ml);Korn-Härte (--);Fallzahl Korn (s);Notiz;Beschreibung;Material;Testplan;MAC;Lab Customer" in lines_de[0]
     
-    # Check headers
-    assert lines[0] == "SampleID,BatchID,MacNo,CustomerName,MaterialCode,SampleDescription,Tests,ContactPerson,SubmittedAt"
+    row1_de = lines_de[1].split(";")
+    assert row1_de[0] == "1"
+    assert row1_de[1] == "GK2506941"
+    assert row1_de[2] == "343686001002019016"
+    assert row1_de[3] == "Axioma"
+    assert "Nr. 1, ProbenID Labor GK2506941, ProbenID AG 343686001002019016, Sorte Axioma" in row1_de[17]
+
+    # Test English Export (matching appendix/translation.png)
+    csv_en = ExportService.generate_lims_csv(batch, customer, samples, lang="en")
+    lines_en = csv_en.strip().split("\r\n") if "\r\n" in csv_en else csv_en.strip().split("\n")
+    assert "No;SampleID Lab;SampleID AG;Type;Assortment;Series;Country;Federal state;City;Year of sowing;Harvest year;NJ;Location remarks;Sedimentation value (ml);Grain hardness (--);Falling number grain (s);Note;Description;Material;Test plan;MAC;Lab Customer" in lines_en[0]
     
-    # Check rows
-    row1 = lines[1].split(",")
-    assert row1[1] == "1000"
-    assert row1[3] == "Test Customer"
-    assert row1[4] == "BROILER"
-    assert row1[5] == "Sample 1"
-    assert row1[6] == "TOTAL_AA|NIR"
-    assert row1[8] == "2026-07-27T13:00:00Z"
-    
-    row2 = lines[2].split(",")
-    assert row2[4] == "PIG"
-    assert row2[6] == "SUPP_AA|GAA"
+    row1_en = lines_en[1].split(";")
+    assert row1_en[0] == "1"
+    assert row1_en[3] == "Axioma"
+    assert "No 1, SampleID Lab GK2506941, SampleID AG 343686001002019016, Type Axioma" in row1_en[17]
+

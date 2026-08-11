@@ -54,12 +54,31 @@ def create_batch(batch_in: SubmissionBatchCreate, db: Session = Depends(get_sess
 
     # 3. Create the samples
     db_samples = []
-    for s in batch_in.samples:
+    for idx, s in enumerate(batch_in.samples, start=1):
         db_sample = Sample(
             batch_id=batch.id,
-            mac_no=s.mac_no,
+            lab_sample_id=s.lab_sample_id or f"GK25069{40 + idx}",
+            ag_sample_id=s.ag_sample_id or f"343686{idx:03d}002019016",
+            variety=s.variety,
+            assortment_code=s.assortment_code,
+            series=s.series,
+            country=s.country or "Deutschland",
+            state_region=s.state_region,
+            location_city=s.location_city,
+            sowing_year=s.sowing_year,
+            harvest_year=s.harvest_year,
+            harvest_year_code=s.harvest_year_code,
+            location_remark=s.location_remark,
+            customer_notes=s.customer_notes,
+            sedimentation_value_ml=s.sedimentation_value_ml,
+            grain_hardness=s.grain_hardness,
+            falling_number_sec=s.falling_number_sec,
             material_code=s.material_code,
-            sample_description=s.sample_description,
+            test_plan=s.test_plan or "Raw Materials NIR R Cereals",
+            mac_code=s.mac_code or "11550",
+            lab_customer_id=s.lab_customer_id or "61063",
+            mac_no=s.mac_no,
+            sample_description=s.sample_description or s.variety or "Sample",
             test_total_aa=s.test_total_aa,
             test_supp_aa=s.test_supp_aa,
             test_nir=s.test_nir,
@@ -233,21 +252,21 @@ def submit_batch(batch_id: uuid.UUID, db: Session = Depends(get_session)):
     return batch
 
 @router.get("/{batch_id}/export")
-def export_batch_csv(batch_id: uuid.UUID, db: Session = Depends(get_session)):
+def export_batch_csv(batch_id: uuid.UUID, lang: str = "de", db: Session = Depends(get_session)):
     batch = db.get(SubmissionBatch, batch_id)
     if not batch:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission batch not found")
         
     customer = db.get(Customer, batch.customer_id)
     
-    csv_content = ExportService.generate_lims_csv(batch, customer, batch.samples)
+    csv_content = ExportService.generate_lims_csv(batch, customer, batch.samples, lang=lang)
     
     # Log the export action
     audit = AuditLog(
         batch_id=batch.id,
         action="exported",
         user_name="system",
-        details={"export_format": "LIMS_CSV"}
+        details={"export_format": "LIMS_CSV_22_COLUMNS", "language": lang}
     )
     db.add(audit)
     db.commit()
@@ -260,7 +279,7 @@ def export_batch_csv(batch_id: uuid.UUID, db: Session = Depends(get_session)):
     clean_customer = re.sub(r'[^a-zA-Z0-9]+', '', raw_customer) or "Customer"
     sample_count = len(batch.samples) if batch.samples else 0
     
-    filename = f"{date_str}_{clean_customer}_{sample_count}samples.csv"
+    filename = f"{date_str}_{clean_customer}_{sample_count}samples_{lang}.csv"
     return Response(
         content=csv_content,
         media_type="text/csv",

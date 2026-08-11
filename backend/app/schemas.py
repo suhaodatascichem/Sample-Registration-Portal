@@ -151,9 +151,37 @@ class CustomerRead(CustomerBase):
 
 # Sample Validation & Schemas
 class SampleBase(BaseModel):
+    # System & Auto-Generated Identifiers
+    lab_sample_id: Optional[str] = None
+    ag_sample_id: Optional[str] = None
     mac_no: Optional[str] = None
-    material_code: str
-    sample_description: str
+    
+    # Customer Input Business Fields
+    variety: Optional[str] = None                      # Sorte / Type
+    assortment_code: Optional[str] = None             # Sortiment / Assortment
+    series: Optional[str] = None                      # Serie / Series
+    country: Optional[str] = "Deutschland"             # Land / Country
+    state_region: Optional[str] = None                # B-Land / Federal state
+    location_city: Optional[str] = None               # Ort / City
+    sowing_year: Optional[int] = None                  # Ansaatjahr / Year of sowing
+    harvest_year: Optional[int] = None                 # Erntejahr / Harvest year
+    harvest_year_code: Optional[str] = None            # NJ / NJ
+    location_remark: Optional[str] = None              # Standort-Hinweis / Location remarks
+    customer_notes: Optional[str] = None               # Notiz / Note
+    
+    # Lab / Measured Quality Metrics
+    sedimentation_value_ml: Optional[float] = None     # Sedimentationswert (ml)
+    grain_hardness: Optional[float] = None             # Korn-Härte (--)
+    falling_number_sec: Optional[float] = None         # Fallzahl Korn (s)
+    
+    # System / LIMS Presets
+    material_code: str = "RMWHEA01"
+    test_plan: Optional[str] = "Raw Materials NIR R Cereals"
+    mac_code: Optional[str] = "11550"
+    lab_customer_id: Optional[str] = "61063"
+    
+    # Test flags & descriptions
+    sample_description: str = "Sample"
     test_total_aa: bool = False
     test_supp_aa: bool = False
     test_nir: bool = False
@@ -184,8 +212,12 @@ class SampleBase(BaseModel):
             self.test_gaa,
             self.test_tdf
         ]
+        # If variety or test_plan or grain quality metric is provided, auto-enable test_nir if no test flag is selected
         if not any(tests):
-            raise ValueError("At least one test must be requested (total_aa, supp_aa, nir, trp, gaa, tdf)")
+            if self.variety or self.sedimentation_value_ml is not None or self.grain_hardness is not None or self.falling_number_sec is not None:
+                self.test_nir = True
+            else:
+                raise ValueError("At least one test must be requested (total_aa, supp_aa, nir, trp, gaa, tdf)")
         return self
 
 class SampleCreate(SampleBase):
@@ -194,6 +226,7 @@ class SampleCreate(SampleBase):
 class SampleRead(SampleBase):
     id: uuid.UUID
     batch_id: uuid.UUID
+    description: Optional[str] = None  # Derived Beschreibung / Description field
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
