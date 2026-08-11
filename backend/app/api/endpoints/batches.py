@@ -252,7 +252,7 @@ def submit_batch(batch_id: uuid.UUID, db: Session = Depends(get_session)):
     return batch
 
 @router.get("/{batch_id}/export")
-def export_batch_csv(batch_id: uuid.UUID, lang: str = "de", db: Session = Depends(get_session)):
+def export_batch_csv(batch_id: uuid.UUID, lang: str = "en", db: Session = Depends(get_session)):
     batch = db.get(SubmissionBatch, batch_id)
     if not batch:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission batch not found")

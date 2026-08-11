@@ -160,7 +160,7 @@ class SampleBase(BaseModel):
     variety: Optional[str] = None                      # Sorte / Type
     assortment_code: Optional[str] = None             # Sortiment / Assortment
     series: Optional[str] = None                      # Serie / Series
-    country: Optional[str] = "Deutschland"             # Land / Country
+    country: Optional[str] = "Germany"                 # Land / Country
     state_region: Optional[str] = None                # B-Land / Federal state
     location_city: Optional[str] = None               # Ort / City
     sowing_year: Optional[int] = None                  # Ansaatjahr / Year of sowing

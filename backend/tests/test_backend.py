@@ -108,6 +108,18 @@ def test_lims_csv_export_22_columns():
         )
     ]
     
+    # Test Default English Export (matching appendix/translation.png)
+    csv_en = ExportService.generate_lims_csv(batch, customer, samples)
+    lines_en = csv_en.strip().split("\r\n") if "\r\n" in csv_en else csv_en.strip().split("\n")
+    assert "No;SampleID Lab;SampleID AG;Type;Assortment;Series;Country;Federal state;City;Year of sowing;Harvest year;NJ;Location remarks;Sedimentation value (ml);Grain hardness (--);Falling number grain (s);Note;Description;Material;Test plan;MAC;Lab Customer" in lines_en[0]
+    
+    row1_en = lines_en[1].split(";")
+    assert row1_en[0] == "1"
+    assert row1_en[1] == "GK2506941"
+    assert row1_en[2] == "343686001002019016"
+    assert row1_en[3] == "Axioma"
+    assert "No 1, SampleID Lab GK2506941, SampleID AG 343686001002019016, Type Axioma" in row1_en[17]
+
     # Test German Export
     csv_de = ExportService.generate_lims_csv(batch, customer, samples, lang="de")
     lines_de = csv_de.strip().split("\r\n") if "\r\n" in csv_de else csv_de.strip().split("\n")
@@ -115,8 +127,6 @@ def test_lims_csv_export_22_columns():
     
     row1_de = lines_de[1].split(";")
     assert row1_de[0] == "1"
-    assert row1_de[1] == "GK2506941"
-    assert row1_de[2] == "343686001002019016"
     assert row1_de[3] == "Axioma"
     assert "Nr. 1, ProbenID Labor GK2506941, ProbenID AG 343686001002019016, Sorte Axioma" in row1_de[17]
 

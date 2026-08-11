@@ -39,7 +39,7 @@ class Sample(SQLModel, table=True):
     variety: Optional[str] = Field(default=None)                      # Sorte / Type
     assortment_code: Optional[str] = Field(default=None)             # Sortiment / Assortment
     series: Optional[str] = Field(default=None)                      # Serie / Series
-    country: Optional[str] = Field(default="Deutschland")             # Land / Country
+    country: Optional[str] = Field(default="Germany")                 # Land / Country
     state_region: Optional[str] = Field(default=None)                # B-Land / Federal state
     location_city: Optional[str] = Field(default=None)               # Ort / City
     sowing_year: Optional[int] = Field(default=None)                  # Ansaatjahr / Year of sowing

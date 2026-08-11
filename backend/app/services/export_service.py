@@ -88,36 +88,9 @@ def resolve_material(sample: Sample) -> str:
 
 class ExportService:
     @staticmethod
-    def build_derived_description(sample: Sample, seq_nr: int, lang: str = "de") -> str:
+    def build_derived_description(sample: Sample, seq_nr: int, lang: str = "en") -> str:
         """Dynamically computes the derived description string from non-null sample metadata."""
-        if lang == "en":
-            parts = [
-                f"No {seq_nr}",
-                f"SampleID Lab {sample.lab_sample_id or ''}",
-                f"SampleID AG {sample.ag_sample_id or ''}",
-                f"Type {sample.variety or ''}"
-            ]
-            if sample.assortment_code:
-                parts.append(f"Assortment {sample.assortment_code}")
-            if sample.series:
-                parts.append(f"Series {sample.series}")
-            if sample.country:
-                parts.append(f"Country {sample.country}")
-            if sample.state_region:
-                parts.append(f"Federal state {sample.state_region}")
-            if sample.location_city:
-                parts.append(f"City {sample.location_city}")
-            if sample.sowing_year:
-                parts.append(f"Year of sowing {sample.sowing_year}")
-            if sample.harvest_year:
-                parts.append(f"Harvest year {sample.harvest_year}")
-            if sample.sedimentation_value_ml is not None:
-                parts.append(f"Sedimentation value (ml) {_format_num(sample.sedimentation_value_ml)}")
-            if sample.grain_hardness is not None:
-                parts.append(f"Grain hardness (--) {_format_num(sample.grain_hardness)}")
-            if sample.falling_number_sec is not None:
-                parts.append(f"Falling number grain (s) {_format_num(sample.falling_number_sec)}")
-        else: # Default German format matching Greimersdorf Weizen.CSV
+        if lang == "de":
             parts = [
                 f"Nr. {seq_nr}",
                 f"ProbenID Labor {sample.lab_sample_id or ''}",
@@ -129,7 +102,8 @@ class ExportService:
             if sample.series:
                 parts.append(f"Serie {sample.series}")
             if sample.country:
-                parts.append(f"Land  {sample.country}")
+                country_de = "Deutschland" if sample.country in ["Germany", "Deutschland"] else sample.country
+                parts.append(f"Land  {country_de}")
             if sample.state_region:
                 parts.append(f"B-Land {sample.state_region}")
             if sample.location_city:
@@ -144,17 +118,45 @@ class ExportService:
                 parts.append(f"Korn-Härte (--) {_format_num(sample.grain_hardness)}")
             if sample.falling_number_sec is not None:
                 parts.append(f"Fallzahl Korn (s) {_format_num(sample.falling_number_sec)}")
+        else: # Default English format matching translation.png
+            parts = [
+                f"No {seq_nr}",
+                f"SampleID Lab {sample.lab_sample_id or ''}",
+                f"SampleID AG {sample.ag_sample_id or ''}",
+                f"Type {sample.variety or ''}"
+            ]
+            if sample.assortment_code:
+                parts.append(f"Assortment {sample.assortment_code}")
+            if sample.series:
+                parts.append(f"Series {sample.series}")
+            if sample.country:
+                country_en = "Germany" if sample.country in ["Germany", "Deutschland"] else sample.country
+                parts.append(f"Country {country_en}")
+            if sample.state_region:
+                parts.append(f"Federal state {sample.state_region}")
+            if sample.location_city:
+                parts.append(f"City {sample.location_city}")
+            if sample.sowing_year:
+                parts.append(f"Year of sowing {sample.sowing_year}")
+            if sample.harvest_year:
+                parts.append(f"Harvest year {sample.harvest_year}")
+            if sample.sedimentation_value_ml is not None:
+                parts.append(f"Sedimentation value (ml) {_format_num(sample.sedimentation_value_ml)}")
+            if sample.grain_hardness is not None:
+                parts.append(f"Grain hardness (--) {_format_num(sample.grain_hardness)}")
+            if sample.falling_number_sec is not None:
+                parts.append(f"Falling number grain (s) {_format_num(sample.falling_number_sec)}")
                 
         return ", ".join(parts)
 
     @staticmethod
-    def generate_lims_csv(batch: SubmissionBatch, customer: Customer, samples: List[Sample], lang: str = "de") -> str:
-        """Generates 22-column semicolon-separated CSV matching Greimersdorf Weizen.CSV template."""
+    def generate_lims_csv(batch: SubmissionBatch, customer: Customer, samples: List[Sample], lang: str = "en") -> str:
+        """Generates 22-column semicolon-separated CSV. Defaults to English headers matching translation.png."""
         output = io.StringIO()
         writer = csv.writer(output, delimiter=";")
         
         # Write headers
-        headers = ENGLISH_HEADERS_22 if lang == "en" else GERMAN_HEADERS_22
+        headers = GERMAN_HEADERS_22 if lang == "de" else ENGLISH_HEADERS_22
         writer.writerow(headers)
         
         # Write sample rows
@@ -168,6 +170,12 @@ class ExportService:
             material_val = resolve_material(sample)
             test_plan_val = resolve_test_plan(sample)
 
+            country_val = sample.country or "Germany"
+            if lang == "de" and country_val == "Germany":
+                country_val = "Deutschland"
+            elif lang == "en" and country_val == "Deutschland":
+                country_val = "Germany"
+
             row = [
                 str(index),
                 sample.lab_sample_id or f"GK25069{40 + index}",
@@ -175,7 +183,7 @@ class ExportService:
                 sample.variety or sample.sample_description or "",
                 sample.assortment_code or "",
                 sample.series or "",
-                sample.country or "Deutschland",
+                country_val,
                 sample.state_region or "",
                 sample.location_city or "",
                 str(sample.sowing_year) if sample.sowing_year else "",
