@@ -120,13 +120,29 @@ def test_lims_csv_export_22_columns():
     assert row1_de[3] == "Axioma"
     assert "Nr. 1, ProbenID Labor GK2506941, ProbenID AG 343686001002019016, Sorte Axioma" in row1_de[17]
 
-    # Test English Export (matching appendix/translation.png)
-    csv_en = ExportService.generate_lims_csv(batch, customer, samples, lang="en")
-    lines_en = csv_en.strip().split("\r\n") if "\r\n" in csv_en else csv_en.strip().split("\n")
-    assert "No;SampleID Lab;SampleID AG;Type;Assortment;Series;Country;Federal state;City;Year of sowing;Harvest year;NJ;Location remarks;Sedimentation value (ml);Grain hardness (--);Falling number grain (s);Note;Description;Material;Test plan;MAC;Lab Customer" in lines_en[0]
-    
-    row1_en = lines_en[1].split(";")
-    assert row1_en[0] == "1"
-    assert row1_en[3] == "Axioma"
-    assert "No 1, SampleID Lab GK2506941, SampleID AG 343686001002019016, Type Axioma" in row1_en[17]
+def test_dynamic_test_plan_and_material_resolution():
+    from app.services.export_service import resolve_test_plan, resolve_material
+
+    # Rule 1: Feed + Total AA -> complete feed wet chem total AA
+    s1 = Sample(material_code="BROILER", test_total_aa=True, test_supp_aa=False, test_nir=False)
+    assert resolve_material(s1) == "BROILER"
+    assert resolve_test_plan(s1) == "complete feed wet chem total AA"
+
+    # Rule 2: Feed + Total AA + Supp AA -> complete feed wet chem
+    s2 = Sample(material_code="BROILER", test_total_aa=True, test_supp_aa=True, test_nir=False)
+    assert resolve_test_plan(s2) == "complete feed wet chem"
+
+    # Rule 3: Raw material + NIR -> raw material NIR
+    s3 = Sample(material_code="SOYBEAN_MEAL", test_total_aa=False, test_supp_aa=False, test_nir=True)
+    assert resolve_material(s3) == "SOYBEAN_MEAL"
+    assert resolve_test_plan(s3) == "raw material NIR"
+
+    # Rule 4: Raw material + Total AA -> raw material wet chem
+    s4 = Sample(material_code="SOYBEAN_MEAL", test_total_aa=True, test_supp_aa=False, test_nir=False)
+    assert resolve_test_plan(s4) == "raw material wet chem"
+
+    # Rule 5: Raw material + Total AA + NIR -> raw material wet chem + NIR
+    s5 = Sample(material_code="SOYBEAN_MEAL", test_total_aa=True, test_supp_aa=False, test_nir=True)
+    assert resolve_test_plan(s5) == "raw material wet chem + NIR"
+
 

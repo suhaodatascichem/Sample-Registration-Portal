@@ -54,8 +54,8 @@ class Sample(SQLModel, table=True):
     falling_number_sec: Optional[float] = Field(default=None)         # Fallzahl Korn (s)
     
     # System / LIMS Presets
-    material_code: str = Field(default="RMWHEA01")                    # Material (e.g. BROILER, WHEAT, RMWHEA01)
-    test_plan: Optional[str] = Field(default="Raw Materials NIR R Cereals") # Testplan / Test plan
+    material_code: str = Field(default="RAW_MATERIAL")                 # Material (e.g. BROILER, SOYBEAN_MEAL, WHEAT, CORN)
+    test_plan: Optional[str] = Field(default=None)                      # Dynamic Testplan / Test plan
     mac_code: Optional[str] = Field(default="11550")                   # MAC / MAC
     lab_customer_id: Optional[str] = Field(default="61063")           # Lab Customer
     

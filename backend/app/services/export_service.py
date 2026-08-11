@@ -31,6 +31,61 @@ def _format_num(val: Optional[Any]) -> str:
     except (ValueError, TypeError):
         return str(val)
 
+def resolve_test_plan(sample: Sample) -> str:
+    """Dynamically resolves Testplan based on material type (Feed vs Raw Material) and requested tests.
+    Rules:
+    1. feed with requesting total AA --> complete feed wet chem total AA
+    2. feed with requesting total AA + supp.AA --> complete feed wet chem
+    3. raw material with requesting NIR --> raw material NIR
+    4. raw material with requesting total AA --> raw material wet chem
+    5. raw material with requesting total AA + NIR --> raw material wet chem + NIR
+    """
+    if sample.test_plan and sample.test_plan not in ["Raw Materials NIR R Cereals", "RAW_MATERIAL", ""]:
+        return sample.test_plan
+
+    mat_code = (sample.material_code or "").upper()
+    
+    # Classify material category: Feed vs Raw Material
+    is_feed = mat_code in ["BROILER", "PIG", "FISH", "RUMINANT", "PET"] or any(k in mat_code.lower() for k in ["feed", "mash", "pellet", "starter", "grower", "finisher"])
+    
+    has_total_aa = bool(getattr(sample, "test_total_aa", False))
+    has_supp_aa = bool(getattr(sample, "test_supp_aa", False))
+    has_nir = bool(getattr(sample, "test_nir", False))
+
+    if is_feed:
+        if has_total_aa and has_supp_aa and has_nir:
+            return "complete feed wet chem + NIR"
+        elif has_total_aa and has_supp_aa:
+            return "complete feed wet chem"
+        elif has_total_aa and has_nir:
+            return "complete feed wet chem total AA + NIR"
+        elif has_total_aa:
+            return "complete feed wet chem total AA"
+        elif has_nir:
+            return "complete feed NIR"
+        else:
+            return "complete feed wet chem"
+    else:  # Raw Material (Soybean meal, Corn, Wheat, Canola, Grains, etc.)
+        if has_total_aa and has_nir:
+            return "raw material wet chem + NIR"
+        elif has_total_aa:
+            return "raw material wet chem"
+        elif has_nir:
+            return "raw material NIR"
+        else:
+            return "raw material NIR"
+
+def resolve_material(sample: Sample) -> str:
+    """Returns customer-recognized material code."""
+    mat = (sample.material_code or "").strip()
+    if mat and mat not in ["RAW_MATERIAL", "OTHER", "RMWHEA01"]:
+        return mat
+    if sample.variety:
+        return "WHEAT"
+    if sample.sample_description and sample.sample_description != "Sample":
+        return sample.sample_description
+    return mat or "RAW_MATERIAL"
+
 class ExportService:
     @staticmethod
     def build_derived_description(sample: Sample, seq_nr: int, lang: str = "de") -> str:
@@ -110,6 +165,9 @@ class ExportService:
             hardness_val = _format_num(sample.grain_hardness)
             fn_val = _format_num(sample.falling_number_sec)
 
+            material_val = resolve_material(sample)
+            test_plan_val = resolve_test_plan(sample)
+
             row = [
                 str(index),
                 sample.lab_sample_id or f"GK25069{40 + index}",
@@ -129,8 +187,8 @@ class ExportService:
                 fn_val,
                 sample.customer_notes or "",
                 derived_desc,
-                sample.material_code or "RMWHEA01",
-                sample.test_plan or "Raw Materials NIR R Cereals",
+                material_val,
+                test_plan_val,
                 sample.mac_code or "11550",
                 sample.lab_customer_id or "61063"
             ]

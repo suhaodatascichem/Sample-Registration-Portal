@@ -175,8 +175,8 @@ class SampleBase(BaseModel):
     falling_number_sec: Optional[float] = None         # Fallzahl Korn (s)
     
     # System / LIMS Presets
-    material_code: str = "RMWHEA01"
-    test_plan: Optional[str] = "Raw Materials NIR R Cereals"
+    material_code: str = "RAW_MATERIAL"
+    test_plan: Optional[str] = None
     mac_code: Optional[str] = "11550"
     lab_customer_id: Optional[str] = "61063"
     
