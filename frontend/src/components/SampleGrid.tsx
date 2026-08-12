@@ -1,3 +1,10 @@
+"use client";
+
+import React, { useRef, useMemo, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import { ColDef, GridReadyEvent, CellKeyDownEvent } from "ag-grid-community";
+import { Plus, Trash2, CheckCircle, Info } from "lucide-react";
+
 // Custom Header Component for Checkbox columns (Check All / Uncheck All)
 const CheckboxHeader = (props: any) => {
   const { displayName, field, rowData, setRowData } = props;
@@ -57,6 +64,14 @@ const StringHeader = (props: any) => {
     </div>
   );
 };
+
+interface SampleGridProps {
+  rowData: any[];
+  setRowData: React.Dispatch<React.SetStateAction<any[]>>;
+  validationErrors?: any[];
+  defaultMacNo?: string;
+  defaultContactPerson?: string;
+}
 
 export default function SampleGrid({ rowData, setRowData, validationErrors = [], defaultMacNo = "", defaultContactPerson = "Sheila" }: SampleGridProps) {
   const gridRef = useRef<AgGridReact | null>(null);
