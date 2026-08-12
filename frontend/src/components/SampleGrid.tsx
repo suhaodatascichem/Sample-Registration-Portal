@@ -37,34 +37,6 @@ const CheckboxHeader = (props: any) => {
   );
 };
 
-// Custom Header Component for String/Dropdown columns (Fill Down Copying Row 1)
-const StringHeader = (props: any) => {
-  const { displayName, field, rowData, setRowData } = props;
-
-  const handleFillDown = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!rowData || rowData.length === 0) return;
-    const topValue = rowData[0][field];
-    if (topValue === undefined) return;
-    setRowData((prev: any[]) => prev.map((row) => ({ ...row, [field]: topValue })));
-  };
-
-  return (
-    <div className="flex items-center justify-between w-full font-bold select-none text-slate-200 group gap-1">
-      <span className="text-xs truncate">{displayName}</span>
-      {rowData && rowData.length > 0 && (
-        <button
-          onClick={handleFillDown}
-          className="px-1.5 py-0.5 rounded bg-brand-500/20 hover:bg-brand-500/50 text-brand-300 hover:text-white text-[10px] font-bold border border-brand-500/30 flex items-center gap-0.5 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
-          title={`Fill Down: Copy row 1's "${rowData[0]?.[field] || ''}" to all rows below`}
-        >
-          <span>Fill Down ⬇</span>
-        </button>
-      )}
-    </div>
-  );
-};
-
 interface SampleGridProps {
   rowData: any[];
   setRowData: React.Dispatch<React.SetStateAction<any[]>>;
@@ -151,24 +123,21 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       cellClass: "text-slate-500 font-semibold text-center"
     },
     {
-      headerComponent: StringHeader,
-      headerComponentParams: { displayName: "Mac. no", field: "mac_no", rowData, setRowData },
+      headerName: "Mac. no",
       field: "mac_no",
       editable: true,
       flex: 1.2,
       cellClass: "font-semibold text-slate-800"
     },
     {
-      headerComponent: StringHeader,
-      headerComponentParams: { displayName: "Customer ID", field: "customer_name", rowData, setRowData },
+      headerName: "Customer ID",
       field: "customer_name",
       editable: true,
       flex: 1.5,
       cellClass: "font-medium"
     },
     {
-      headerComponent: StringHeader,
-      headerComponentParams: { displayName: "Material Code", field: "material_code", rowData, setRowData },
+      headerName: "Material Code",
       field: "material_code",
       editable: true,
       cellEditor: "agSelectCellEditor",
@@ -178,8 +147,7 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       flex: 1.2
     },
     {
-      headerComponent: StringHeader,
-      headerComponentParams: { displayName: "Sample Description", field: "sample_description", rowData, setRowData },
+      headerName: "Sample Description",
       field: "sample_description",
       editable: true,
       flex: 2
@@ -245,8 +213,7 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       cellClass: "flex items-center justify-center"
     },
     {
-      headerComponent: StringHeader,
-      headerComponentParams: { displayName: "Contact Person", field: "contact_person", rowData, setRowData },
+      headerName: "Contact Person",
       field: "contact_person",
       editable: true,
       flex: 1.4,
