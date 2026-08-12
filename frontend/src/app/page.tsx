@@ -39,12 +39,13 @@ export default function IntakeDashboard() {
   };
 
   // Callback when Upload Files performs OCR/Vision processing on PDFs or images
-  const handlePhotoOCR = (ocrText: string, isPdf?: boolean) => {
+  const handlePhotoOCR = (ocrText: string, isPdf?: boolean, fileName?: string) => {
     setErrorMsg(null);
     const nextCount = photoCount + 1;
     setPhotoCount(nextCount);
-    const tag = isPdf ? `PDF Document ${nextCount}` : `Uploaded Image ${nextCount}`;
-    const entry = `${tag} (${ocrText})`;
+    const fileLabel = fileName ? ` "${fileName}"` : ` ${nextCount}`;
+    const tag = isPdf ? `PDF Document${fileLabel}` : `Uploaded Image${fileLabel}`;
+    const entry = `${tag}:\n${ocrText}`;
     setTextIntakeValue((prev) => (prev.trim() ? `${prev}\n\n${entry}` : entry));
   };
 

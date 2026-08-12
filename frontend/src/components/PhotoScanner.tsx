@@ -5,7 +5,7 @@ import { Upload, Image as ImageIcon, FileText, Loader2, Sparkles, X } from "luci
 import { api } from "@/utils/api";
 
 interface PhotoScannerProps {
-  onOCRSuccess: (text: string, isPdf: boolean) => void;
+  onOCRSuccess: (text: string, isPdf: boolean, fileName?: string) => void;
   onError: (error: string) => void;
 }
 
@@ -70,7 +70,7 @@ export default function PhotoScanner({ onOCRSuccess, onError }: PhotoScannerProp
     setIsProcessing(true);
     try {
       const result = await api.ocrPhoto(file);
-      onOCRSuccess(result.text, isPdf);
+      onOCRSuccess(result.text, isPdf, file.name);
     } catch (err: any) {
       onError(err.message || "Failed to parse uploaded file.");
     } finally {
