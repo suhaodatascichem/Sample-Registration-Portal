@@ -142,9 +142,11 @@ class AIService:
             system_prompt = (
                 "You are an expert document OCR and laboratory manifest digitizer.\n"
                 "Analyze the uploaded document or image (which may be a multi-page PDF, printed sheet, or photo).\n"
-                "If the document has multiple pages, search across all pages to locate the sample registration invoice, batch summary, or chain-of-custody table. Ignore non-sample pages like cover letters or general terms.\n"
-                "Transcribe all relevant sample information into clean, tidy, structured English intake notes.\n"
-                "Clearly list customer names, sample descriptions, material types (e.g. soybean meal, broiler feed, corn), sample counts, and requested tests (Total AA, Supp AA, NIR, TRP, GAA, TDF)."
+                "CRITICAL EXTRACTION RULES:\n"
+                "1. NO SHIPMENT NOISE: DO NOT include general logistics info (such as DHL/FedEx waybill numbers, package weight, courier details, or origin addresses). Omit these completely.\n"
+                "2. KEEP CUSTOMER INFO: Always extract and clearly list the Customer / Company Name and primary contact person.\n"
+                "3. LIST SAMPLES: Clearly list all sample IDs, sample codes, treatment numbers (e.g. T-1 to T-11), material types, and sample descriptions.\n"
+                "4. STRICT TEST DETECTION (NO GUESSING): Extract requested analytical tests ONLY if explicitly written in the document. If NO specific tests (e.g. Total AA, Supp AA, NIR, TRP, GAA, TDF) are explicitly specified, DO NOT guess or assume test panels. Instead, explicitly output: 'Requested Analysis: Not found in document - please specify tests manually.'"
             )
 
             try:

@@ -195,6 +195,33 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
     }
   }), []);
 
+  const [bulkMaterial, setBulkMaterial] = useState("BROILER");
+  const [bulkContact, setBulkContact] = useState(defaultContactPerson || "Sheila");
+  const [showBulkBar, setShowBulkBar] = useState(true);
+
+  // Bulk column handlers
+  const bulkToggleTest = (field: string, value: boolean) => {
+    setRowData((prev) => prev.map((row) => ({ ...row, [field]: value })));
+  };
+
+  const bulkSetAllTests = (value: boolean) => {
+    setRowData((prev) =>
+      prev.map((row) => ({
+        ...row,
+        test_total_aa: value,
+        test_supp_aa: value,
+        test_nir: value,
+        test_trp: value,
+        test_gaa: value,
+        test_tdf: value,
+      }))
+    );
+  };
+
+  const bulkFillField = (field: string, value: any) => {
+    setRowData((prev) => prev.map((row) => ({ ...row, [field]: value })));
+  };
+
   const addRow = () => {
     // Find last row values to prefill for efficiency
     const lastRow = rowData.length > 0 ? rowData[rowData.length - 1] : null;
@@ -240,6 +267,13 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
           <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/5 border border-white/10 text-slate-400">
             {rowData.length} sample{rowData.length !== 1 && 's'}
           </span>
+          <button
+            onClick={() => setShowBulkBar((prev) => !prev)}
+            className="ml-2 px-2.5 py-1 rounded text-[11px] font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-300 border border-brand-500/30 transition-all flex items-center gap-1"
+          >
+            <CheckCircle className="w-3.5 h-3.5" />
+            {showBulkBar ? "Hide Bulk Controls" : "Show Bulk Controls"}
+          </button>
         </div>
         
         <div className="flex items-center gap-2">
@@ -261,6 +295,112 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
           </button>
         </div>
       </div>
+
+      {/* Bulk Column Actions Bar */}
+      {showBulkBar && (
+        <div className="p-3 rounded-2xl bg-slate-950/70 border border-brand-500/20 flex flex-col gap-2.5 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2">
+            <div className="flex items-center gap-1.5 font-semibold text-brand-300">
+              <CheckCircle className="w-4 h-4 text-brand-400" />
+              <span>Bulk Column Actions (Apply to All {rowData.length} Rows):</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => bulkSetAllTests(true)}
+                disabled={rowData.length === 0}
+                className="px-2.5 py-1 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 disabled:opacity-30 text-brand-200 border border-brand-500/30 font-semibold text-[11px] transition-all"
+              >
+                Check All Tests
+              </button>
+              <button
+                onClick={() => bulkSetAllTests(false)}
+                disabled={rowData.length === 0}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-slate-300 border border-white/10 font-semibold text-[11px] transition-all"
+              >
+                Uncheck All Tests
+              </button>
+            </div>
+          </div>
+
+          {/* Test Checkbox Bulk Toggles */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-slate-400 font-semibold text-[11px] mr-1">Toggle Test Column:</span>
+            {[
+              { label: "Total AA", key: "test_total_aa" },
+              { label: "Supp AA", key: "test_supp_aa" },
+              { label: "NIR", key: "test_nir" },
+              { label: "Trp", key: "test_trp" },
+              { label: "GAA", key: "test_gaa" },
+              { label: "TDF", key: "test_tdf" },
+            ].map((t) => (
+              <div key={t.key} className="flex items-center rounded-lg border border-white/10 overflow-hidden bg-slate-900">
+                <span className="px-2 py-0.5 text-[11px] text-slate-300 font-medium bg-slate-950/60 border-r border-white/5">
+                  {t.label}
+                </span>
+                <button
+                  onClick={() => bulkToggleTest(t.key, true)}
+                  disabled={rowData.length === 0}
+                  className="px-2 py-0.5 hover:bg-brand-500/30 text-brand-300 disabled:opacity-30 font-bold text-[10px]"
+                  title={`Check ${t.label} for all rows`}
+                >
+                  ✓ All
+                </button>
+                <button
+                  onClick={() => bulkToggleTest(t.key, false)}
+                  disabled={rowData.length === 0}
+                  className="px-2 py-0.5 hover:bg-red-500/30 text-red-400 disabled:opacity-30 font-bold text-[10px] border-l border-white/5"
+                  title={`Uncheck ${t.label} for all rows`}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {/* Field Values Bulk Fill */}
+          <div className="flex flex-wrap items-center gap-4 pt-1">
+            {/* Bulk Material Code */}
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 font-semibold text-[11px]">Set Material Code:</span>
+              <select
+                value={bulkMaterial}
+                onChange={(e) => setBulkMaterial(e.target.value)}
+                className="px-2 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-200 text-xs focus:outline-none"
+              >
+                {materials.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              <button
+                onClick={() => bulkFillField("material_code", bulkMaterial)}
+                disabled={rowData.length === 0}
+                className="px-2.5 py-1 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 disabled:opacity-30 text-brand-300 border border-brand-500/30 font-semibold text-[11px]"
+              >
+                Fill All Rows
+              </button>
+            </div>
+
+            {/* Bulk Contact Person */}
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 font-semibold text-[11px]">Set Contact Person:</span>
+              <input
+                type="text"
+                value={bulkContact}
+                onChange={(e) => setBulkContact(e.target.value)}
+                placeholder="e.g. Sheila"
+                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-200 text-xs w-28 focus:outline-none"
+              />
+              <button
+                onClick={() => bulkFillField("contact_person", bulkContact)}
+                disabled={rowData.length === 0}
+                className="px-2.5 py-1 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 disabled:opacity-30 text-brand-300 border border-brand-500/30 font-semibold text-[11px]"
+              >
+                Fill All Rows
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Grid container */}
       <div className="w-full height-container h-[420px]">
