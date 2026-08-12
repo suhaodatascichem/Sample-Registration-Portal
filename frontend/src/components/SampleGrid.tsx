@@ -298,33 +298,33 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
 
       {/* Bulk Column Actions Bar */}
       {showBulkBar && (
-        <div className="p-3 rounded-2xl bg-slate-950/70 border border-brand-500/20 flex flex-col gap-2.5 text-xs">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2">
-            <div className="flex items-center gap-1.5 font-semibold text-brand-300">
+        <div className="p-4 rounded-2xl bg-slate-900 border-2 border-brand-500/40 shadow-xl flex flex-col gap-3 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-500/20 pb-2.5">
+            <div className="flex items-center gap-2 font-bold text-brand-300">
               <CheckCircle className="w-4 h-4 text-brand-400" />
               <span>Bulk Column Actions (Apply to All {rowData.length} Rows):</span>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => bulkSetAllTests(true)}
                 disabled={rowData.length === 0}
-                className="px-2.5 py-1 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 disabled:opacity-30 text-brand-200 border border-brand-500/30 font-semibold text-[11px] transition-all"
+                className="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white shadow-sm font-bold text-xs transition-all border border-brand-400/40"
               >
-                Check All Tests
+                ✓ Check All Tests
               </button>
               <button
                 onClick={() => bulkSetAllTests(false)}
                 disabled={rowData.length === 0}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-slate-300 border border-white/10 font-semibold text-[11px] transition-all"
+                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-600 font-bold text-xs transition-all"
               >
-                Uncheck All Tests
+                ✕ Uncheck All Tests
               </button>
             </div>
           </div>
 
           {/* Test Checkbox Bulk Toggles */}
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-slate-400 font-semibold text-[11px] mr-1">Toggle Test Column:</span>
+            <span className="text-slate-300 font-bold text-xs mr-1">Toggle Test Column:</span>
             {[
               { label: "Total AA", key: "test_total_aa" },
               { label: "Supp AA", key: "test_supp_aa" },
@@ -333,14 +333,14 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
               { label: "GAA", key: "test_gaa" },
               { label: "TDF", key: "test_tdf" },
             ].map((t) => (
-              <div key={t.key} className="flex items-center rounded-lg border border-white/10 overflow-hidden bg-slate-900">
-                <span className="px-2 py-0.5 text-[11px] text-slate-300 font-medium bg-slate-950/60 border-r border-white/5">
+              <div key={t.key} className="flex items-center rounded-xl border border-slate-700 overflow-hidden bg-slate-800 shadow-sm">
+                <span className="px-2.5 py-1 text-xs text-slate-100 font-semibold bg-slate-950 border-r border-slate-700">
                   {t.label}
                 </span>
                 <button
                   onClick={() => bulkToggleTest(t.key, true)}
                   disabled={rowData.length === 0}
-                  className="px-2 py-0.5 hover:bg-brand-500/30 text-brand-300 disabled:opacity-30 font-bold text-[10px]"
+                  className="px-2.5 py-1 hover:bg-brand-600/60 bg-brand-600/30 text-brand-200 disabled:opacity-30 font-extrabold text-xs"
                   title={`Check ${t.label} for all rows`}
                 >
                   ✓ All
@@ -348,7 +348,7 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
                 <button
                   onClick={() => bulkToggleTest(t.key, false)}
                   disabled={rowData.length === 0}
-                  className="px-2 py-0.5 hover:bg-red-500/30 text-red-400 disabled:opacity-30 font-bold text-[10px] border-l border-white/5"
+                  className="px-2.5 py-1 hover:bg-red-600/60 bg-red-500/30 text-red-200 disabled:opacity-30 font-extrabold text-xs border-l border-slate-700"
                   title={`Uncheck ${t.label} for all rows`}
                 >
                   ✕
@@ -358,14 +358,14 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
           </div>
 
           {/* Field Values Bulk Fill */}
-          <div className="flex flex-wrap items-center gap-4 pt-1">
+          <div className="flex flex-wrap items-center gap-5 pt-1">
             {/* Bulk Material Code */}
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 font-semibold text-[11px]">Set Material Code:</span>
+              <span className="text-slate-300 font-bold text-xs">Set Material Code:</span>
               <select
                 value={bulkMaterial}
                 onChange={(e) => setBulkMaterial(e.target.value)}
-                className="px-2 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-200 text-xs focus:outline-none"
+                className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-semibold focus:outline-none focus:border-brand-500 shadow-sm"
               >
                 {materials.map((m) => (
                   <option key={m} value={m}>{m}</option>
@@ -374,7 +374,7 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
               <button
                 onClick={() => bulkFillField("material_code", bulkMaterial)}
                 disabled={rowData.length === 0}
-                className="px-2.5 py-1 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 disabled:opacity-30 text-brand-300 border border-brand-500/30 font-semibold text-[11px]"
+                className="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white font-bold text-xs shadow-sm border border-brand-400/30 transition-all"
               >
                 Fill All Rows
               </button>
@@ -382,18 +382,18 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
 
             {/* Bulk Contact Person */}
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 font-semibold text-[11px]">Set Contact Person:</span>
+              <span className="text-slate-300 font-bold text-xs">Set Contact Person:</span>
               <input
                 type="text"
                 value={bulkContact}
                 onChange={(e) => setBulkContact(e.target.value)}
                 placeholder="e.g. Sheila"
-                className="px-2.5 py-1 rounded-lg bg-slate-900 border border-white/10 text-slate-200 text-xs w-28 focus:outline-none"
+                className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs w-32 font-semibold focus:outline-none focus:border-brand-500 shadow-sm"
               />
               <button
                 onClick={() => bulkFillField("contact_person", bulkContact)}
                 disabled={rowData.length === 0}
-                className="px-2.5 py-1 rounded-lg bg-brand-500/20 hover:bg-brand-500/30 disabled:opacity-30 text-brand-300 border border-brand-500/30 font-semibold text-[11px]"
+                className="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white font-bold text-xs shadow-sm border border-brand-400/30 transition-all"
               >
                 Fill All Rows
               </button>
