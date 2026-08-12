@@ -1,18 +1,62 @@
-"use client";
+// Custom Header Component for Checkbox columns (Check All / Uncheck All)
+const CheckboxHeader = (props: any) => {
+  const { displayName, field, rowData, setRowData } = props;
 
-import React, { useRef, useMemo, useState } from "react";
-import { AgGridReact } from "ag-grid-react";
-import { ColDef, GridReadyEvent, CellKeyDownEvent } from "ag-grid-community";
-import { Plus, Trash2, CheckCircle, Info } from "lucide-react";
-import { Sample } from "@/utils/api";
+  const allChecked = useMemo(() => {
+    if (!rowData || rowData.length === 0) return false;
+    return rowData.every((r: any) => !!r[field]);
+  }, [rowData, field]);
 
-interface SampleGridProps {
-  rowData: any[];
-  setRowData: React.Dispatch<React.SetStateAction<any[]>>;
-  validationErrors?: any[];
-  defaultMacNo?: string;
-  defaultContactPerson?: string;
-}
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextVal = !allChecked;
+    setRowData((prev: any[]) => prev.map((row) => ({ ...row, [field]: nextVal })));
+  };
+
+  return (
+    <div 
+      onClick={handleToggle}
+      className="flex items-center justify-center gap-1.5 cursor-pointer select-none font-bold text-slate-200 hover:text-white transition-colors w-full h-full"
+      title={`Click to check or uncheck all rows for ${displayName}`}
+    >
+      <input
+        type="checkbox"
+        checked={allChecked}
+        onChange={() => {}} // Handled by outer div click
+        className="w-3.5 h-3.5 rounded accent-brand-500 cursor-pointer"
+      />
+      <span className="text-xs">{displayName}</span>
+    </div>
+  );
+};
+
+// Custom Header Component for String/Dropdown columns (Fill Down Copying Row 1)
+const StringHeader = (props: any) => {
+  const { displayName, field, rowData, setRowData } = props;
+
+  const handleFillDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!rowData || rowData.length === 0) return;
+    const topValue = rowData[0][field];
+    if (topValue === undefined) return;
+    setRowData((prev: any[]) => prev.map((row) => ({ ...row, [field]: topValue })));
+  };
+
+  return (
+    <div className="flex items-center justify-between w-full font-bold select-none text-slate-200 group gap-1">
+      <span className="text-xs truncate">{displayName}</span>
+      {rowData && rowData.length > 0 && (
+        <button
+          onClick={handleFillDown}
+          className="px-1.5 py-0.5 rounded bg-brand-500/20 hover:bg-brand-500/50 text-brand-300 hover:text-white text-[10px] font-bold border border-brand-500/30 flex items-center gap-0.5 transition-all opacity-80 group-hover:opacity-100 flex-shrink-0"
+          title={`Fill Down: Copy row 1's "${rowData[0]?.[field] || ''}" to all rows below`}
+        >
+          <span>Fill Down ⬇</span>
+        </button>
+      )}
+    </div>
+  );
+};
 
 export default function SampleGrid({ rowData, setRowData, validationErrors = [], defaultMacNo = "", defaultContactPerson = "Sheila" }: SampleGridProps) {
   const gridRef = useRef<AgGridReact | null>(null);
@@ -92,21 +136,24 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       cellClass: "text-slate-500 font-semibold text-center"
     },
     {
-      headerName: "Mac. no",
+      headerComponent: StringHeader,
+      headerComponentParams: { displayName: "Mac. no", field: "mac_no", rowData, setRowData },
       field: "mac_no",
       editable: true,
       flex: 1.2,
       cellClass: "font-semibold text-slate-800"
     },
     {
-      headerName: "Customer ID",
+      headerComponent: StringHeader,
+      headerComponentParams: { displayName: "Customer ID", field: "customer_name", rowData, setRowData },
       field: "customer_name",
       editable: true,
       flex: 1.5,
       cellClass: "font-medium"
     },
     {
-      headerName: "Material Code",
+      headerComponent: StringHeader,
+      headerComponentParams: { displayName: "Material Code", field: "material_code", rowData, setRowData },
       field: "material_code",
       editable: true,
       cellEditor: "agSelectCellEditor",
@@ -116,111 +163,93 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       flex: 1.2
     },
     {
-      headerName: "Sample Description",
+      headerComponent: StringHeader,
+      headerComponentParams: { displayName: "Sample Description", field: "sample_description", rowData, setRowData },
       field: "sample_description",
       editable: true,
       flex: 2
     },
     {
-      headerName: "Total AA",
+      headerComponent: CheckboxHeader,
+      headerComponentParams: { displayName: "Total AA", field: "test_total_aa", rowData, setRowData },
       field: "test_total_aa",
       editable: true,
       cellRenderer: "agCheckboxCellRenderer",
       cellEditor: "agCheckboxCellEditor",
-      width: 100,
+      width: 115,
       cellClass: "flex items-center justify-center"
     },
     {
-      headerName: "Supp AA",
+      headerComponent: CheckboxHeader,
+      headerComponentParams: { displayName: "Supp AA", field: "test_supp_aa", rowData, setRowData },
       field: "test_supp_aa",
       editable: true,
       cellRenderer: "agCheckboxCellRenderer",
       cellEditor: "agCheckboxCellEditor",
-      width: 100,
+      width: 115,
       cellClass: "flex items-center justify-center"
     },
     {
-      headerName: "NIR",
+      headerComponent: CheckboxHeader,
+      headerComponentParams: { displayName: "NIR", field: "test_nir", rowData, setRowData },
       field: "test_nir",
       editable: true,
       cellRenderer: "agCheckboxCellRenderer",
       cellEditor: "agCheckboxCellEditor",
-      width: 80,
+      width: 95,
       cellClass: "flex items-center justify-center"
     },
     {
-      headerName: "Trp",
+      headerComponent: CheckboxHeader,
+      headerComponentParams: { displayName: "Trp", field: "test_trp", rowData, setRowData },
       field: "test_trp",
       editable: true,
       cellRenderer: "agCheckboxCellRenderer",
       cellEditor: "agCheckboxCellEditor",
-      width: 80,
+      width: 95,
       cellClass: "flex items-center justify-center"
     },
     {
-      headerName: "GAA",
+      headerComponent: CheckboxHeader,
+      headerComponentParams: { displayName: "GAA", field: "test_gaa", rowData, setRowData },
       field: "test_gaa",
       editable: true,
       cellRenderer: "agCheckboxCellRenderer",
       cellEditor: "agCheckboxCellEditor",
-      width: 80,
+      width: 95,
       cellClass: "flex items-center justify-center"
     },
     {
-      headerName: "TDF",
+      headerComponent: CheckboxHeader,
+      headerComponentParams: { displayName: "TDF", field: "test_tdf", rowData, setRowData },
       field: "test_tdf",
       editable: true,
       cellRenderer: "agCheckboxCellRenderer",
       cellEditor: "agCheckboxCellEditor",
-      width: 80,
+      width: 95,
       cellClass: "flex items-center justify-center"
     },
     {
-      headerName: "Contact Person",
+      headerComponent: StringHeader,
+      headerComponentParams: { displayName: "Contact Person", field: "contact_person", rowData, setRowData },
       field: "contact_person",
       editable: true,
       flex: 1.4,
       cellClass: "font-medium text-brand-600"
     }
-  ], []);
+  ], [rowData, setRowData]);
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
-    filter: true,
+    filter: false,
     resizable: true,
+    suppressMenu: true,
     suppressKeyboardEvent: (params: any) => {
       // Allow Ctrl+V to pass through to grid cells
       const e = params.event as KeyboardEvent;
       return (e.ctrlKey || e.metaKey) && e.key === "v";
     }
   }), []);
-
-  const [bulkMaterial, setBulkMaterial] = useState("BROILER");
-  const [bulkContact, setBulkContact] = useState(defaultContactPerson || "Sheila");
-  const [showBulkBar, setShowBulkBar] = useState(true);
-
-  // Bulk column handlers
-  const bulkToggleTest = (field: string, value: boolean) => {
-    setRowData((prev) => prev.map((row) => ({ ...row, [field]: value })));
-  };
-
-  const bulkSetAllTests = (value: boolean) => {
-    setRowData((prev) =>
-      prev.map((row) => ({
-        ...row,
-        test_total_aa: value,
-        test_supp_aa: value,
-        test_nir: value,
-        test_trp: value,
-        test_gaa: value,
-        test_tdf: value,
-      }))
-    );
-  };
-
-  const bulkFillField = (field: string, value: any) => {
-    setRowData((prev) => prev.map((row) => ({ ...row, [field]: value })));
-  };
 
   const addRow = () => {
     // Find last row values to prefill for efficiency
@@ -267,13 +296,6 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
           <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/5 border border-white/10 text-slate-400">
             {rowData.length} sample{rowData.length !== 1 && 's'}
           </span>
-          <button
-            onClick={() => setShowBulkBar((prev) => !prev)}
-            className="ml-2 px-2.5 py-1 rounded text-[11px] font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-300 border border-brand-500/30 transition-all flex items-center gap-1"
-          >
-            <CheckCircle className="w-3.5 h-3.5" />
-            {showBulkBar ? "Hide Bulk Controls" : "Show Bulk Controls"}
-          </button>
         </div>
         
         <div className="flex items-center gap-2">
@@ -295,112 +317,6 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
           </button>
         </div>
       </div>
-
-      {/* Bulk Column Actions Bar */}
-      {showBulkBar && (
-        <div className="p-4 rounded-2xl bg-slate-900 border-2 border-brand-500/40 shadow-xl flex flex-col gap-3 text-xs">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-brand-500/20 pb-2.5">
-            <div className="flex items-center gap-2 font-bold text-brand-300">
-              <CheckCircle className="w-4 h-4 text-brand-400" />
-              <span>Bulk Column Actions (Apply to All {rowData.length} Rows):</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => bulkSetAllTests(true)}
-                disabled={rowData.length === 0}
-                className="px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white shadow-sm font-bold text-xs transition-all border border-brand-400/40"
-              >
-                ✓ Check All Tests
-              </button>
-              <button
-                onClick={() => bulkSetAllTests(false)}
-                disabled={rowData.length === 0}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-slate-200 border border-slate-600 font-bold text-xs transition-all"
-              >
-                ✕ Uncheck All Tests
-              </button>
-            </div>
-          </div>
-
-          {/* Test Checkbox Bulk Toggles */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-slate-300 font-bold text-xs mr-1">Toggle Test Column:</span>
-            {[
-              { label: "Total AA", key: "test_total_aa" },
-              { label: "Supp AA", key: "test_supp_aa" },
-              { label: "NIR", key: "test_nir" },
-              { label: "Trp", key: "test_trp" },
-              { label: "GAA", key: "test_gaa" },
-              { label: "TDF", key: "test_tdf" },
-            ].map((t) => (
-              <div key={t.key} className="flex items-center rounded-xl border border-slate-700 overflow-hidden bg-slate-800 shadow-sm">
-                <span className="px-2.5 py-1 text-xs text-slate-100 font-semibold bg-slate-950 border-r border-slate-700">
-                  {t.label}
-                </span>
-                <button
-                  onClick={() => bulkToggleTest(t.key, true)}
-                  disabled={rowData.length === 0}
-                  className="px-2.5 py-1 hover:bg-brand-600/60 bg-brand-600/30 text-brand-200 disabled:opacity-30 font-extrabold text-xs"
-                  title={`Check ${t.label} for all rows`}
-                >
-                  ✓ All
-                </button>
-                <button
-                  onClick={() => bulkToggleTest(t.key, false)}
-                  disabled={rowData.length === 0}
-                  className="px-2.5 py-1 hover:bg-red-600/60 bg-red-500/30 text-red-200 disabled:opacity-30 font-extrabold text-xs border-l border-slate-700"
-                  title={`Uncheck ${t.label} for all rows`}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Field Values Bulk Fill */}
-          <div className="flex flex-wrap items-center gap-5 pt-1">
-            {/* Bulk Material Code */}
-            <div className="flex items-center gap-2">
-              <span className="text-slate-300 font-bold text-xs">Set Material Code:</span>
-              <select
-                value={bulkMaterial}
-                onChange={(e) => setBulkMaterial(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-semibold focus:outline-none focus:border-brand-500 shadow-sm"
-              >
-                {materials.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
-              <button
-                onClick={() => bulkFillField("material_code", bulkMaterial)}
-                disabled={rowData.length === 0}
-                className="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white font-bold text-xs shadow-sm border border-brand-400/30 transition-all"
-              >
-                Fill All Rows
-              </button>
-            </div>
-
-            {/* Bulk Contact Person */}
-            <div className="flex items-center gap-2">
-              <span className="text-slate-300 font-bold text-xs">Set Contact Person:</span>
-              <input
-                type="text"
-                value={bulkContact}
-                onChange={(e) => setBulkContact(e.target.value)}
-                placeholder="e.g. Sheila"
-                className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs w-32 font-semibold focus:outline-none focus:border-brand-500 shadow-sm"
-              />
-              <button
-                onClick={() => bulkFillField("contact_person", bulkContact)}
-                disabled={rowData.length === 0}
-                className="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 disabled:opacity-40 text-white font-bold text-xs shadow-sm border border-brand-400/30 transition-all"
-              >
-                Fill All Rows
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Grid container */}
       <div className="w-full height-container h-[420px]">
