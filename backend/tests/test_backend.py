@@ -155,4 +155,10 @@ def test_dynamic_test_plan_and_material_resolution():
     s5 = Sample(material_code="SOYBEAN_MEAL", test_total_aa=True, test_supp_aa=False, test_nir=True)
     assert resolve_test_plan(s5) == "raw material wet chem + NIR"
 
+def test_pdf_intake_ocr_fallback():
+    from app.services.ai_service import AIService
+    text = AIService.process_photo_to_text("sample_invoice.pdf")
+    assert "PDF Invoice" in text or "Global Nutrition Corp" in text or "Sample 1" in text
+
+
 

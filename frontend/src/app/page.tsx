@@ -38,12 +38,13 @@ export default function IntakeDashboard() {
     setTextIntakeValue((prev) => (prev.trim() ? `${prev}\n\n${entry}` : entry));
   };
 
-  // Callback when Photo Scanner performs OCR on handwritten or sheet photos
-  const handlePhotoOCR = (ocrText: string) => {
+  // Callback when Upload Files performs OCR/Vision processing on PDFs or images
+  const handlePhotoOCR = (ocrText: string, isPdf?: boolean) => {
     setErrorMsg(null);
     const nextCount = photoCount + 1;
     setPhotoCount(nextCount);
-    const entry = `Photo ${nextCount} (${ocrText})`;
+    const tag = isPdf ? `PDF Document ${nextCount}` : `Uploaded Image ${nextCount}`;
+    const entry = `${tag} (${ocrText})`;
     setTextIntakeValue((prev) => (prev.trim() ? `${prev}\n\n${entry}` : entry));
   };
 

@@ -121,46 +121,54 @@ class AIService:
     @classmethod
     def process_photo_to_text(cls, image_file_path: str) -> str:
         client = cls._get_client()
+        ext = os.path.splitext(image_file_path)[1].lower()
         if not client:
+            if ext == ".pdf":
+                return "Customer: Global Nutrition Corp (PDF Invoice #8942)\nSample 1: Soybean meal Lot A-101 - test Total AA, NIR\nSample 2: Corn meal Lot A-102 - test Total AA, Supp AA\nSample 3: Broiler feed finisher - test NIR, TRP, TDF"
             return "Customer: Agri-Nutrition Labs\nSample 1: Broiler starter mash #001 - test Total AA, NIR, and TRP\nSample 2: Aquaculture shrimp feed #002 - test Supp AA and TDF\nSample 3: Alfalfa hay batch B - test NIR and TDF"
 
         try:
             with open(image_file_path, "rb") as image_file:
                 image_bytes = image_file.read()
 
-            ext = os.path.splitext(image_file_path)[1].lower()
             mime_type = "image/jpeg"
-            if ext in [".png", ".webp"]:
+            if ext == ".pdf":
+                mime_type = "application/pdf"
+            elif ext in [".png", ".webp"]:
                 mime_type = f"image/{ext.replace('.', '')}"
 
-            image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+            doc_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
 
             system_prompt = (
-                "You are an expert OCR and laboratory manifest digitizer. "
-                "Analyze the image of handwritten or printed sample intake sheets, labels, or manifests. "
-                "Transcribe all text into clean, tidy, structured English intake notes. "
+                "You are an expert document OCR and laboratory manifest digitizer.\n"
+                "Analyze the uploaded document or image (which may be a multi-page PDF, printed sheet, or photo).\n"
+                "If the document has multiple pages, search across all pages to locate the sample registration invoice, batch summary, or chain-of-custody table. Ignore non-sample pages like cover letters or general terms.\n"
+                "Transcribe all relevant sample information into clean, tidy, structured English intake notes.\n"
                 "Clearly list customer names, sample descriptions, material types (e.g. soybean meal, broiler feed, corn), sample counts, and requested tests (Total AA, Supp AA, NIR, TRP, GAA, TDF)."
             )
 
             try:
                 response = client.models.generate_content(
                     model="gemini-flash-latest",
-                    contents=[image_part, system_prompt]
+                    contents=[doc_part, system_prompt]
                 )
             except Exception:
                 response = client.models.generate_content(
                     model="gemini-2.0-flash",
-                    contents=[image_part, system_prompt]
+                    contents=[doc_part, system_prompt]
                 )
 
             return response.text or ""
         except Exception as e:
-            logger.warning(f"Gemini vision OCR failed ({e}). Falling back to local mock photo text.")
+            logger.warning(f"Gemini document vision OCR failed ({e}). Falling back to local mock text.")
+            if ext == ".pdf":
+                return "Customer: Global Nutrition Corp (PDF Invoice #8942)\nSample 1: Soybean meal Lot A-101 - test Total AA, NIR\nSample 2: Corn meal Lot A-102 - test Total AA, Supp AA\nSample 3: Broiler feed finisher - test NIR, TRP, TDF"
             return "Customer: Agri-Nutrition Labs\nSample 1: Broiler starter mash #001 - test Total AA, NIR, and TRP\nSample 2: Aquaculture shrimp feed #002 - test Supp AA and TDF\nSample 3: Alfalfa hay batch B - test NIR and TDF"
 
     @classmethod
     def process_photo(cls, image_file_path: str) -> ExtractedBatch:
         client = cls._get_client()
+        ext = os.path.splitext(image_file_path)[1].lower()
         if not client:
             return cls._get_mock_photo_batch()
 
@@ -168,16 +176,18 @@ class AIService:
             with open(image_file_path, "rb") as image_file:
                 image_bytes = image_file.read()
 
-            ext = os.path.splitext(image_file_path)[1].lower()
             mime_type = "image/jpeg"
-            if ext in [".png", ".webp"]:
+            if ext == ".pdf":
+                mime_type = "application/pdf"
+            elif ext in [".png", ".webp"]:
                 mime_type = f"image/{ext.replace('.', '')}"
 
-            image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
+            doc_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
 
             system_prompt = (
-                "You are a laboratory sample OCR and extraction assistant. You analyze images of sample intake sheets, handwritten manifests, or labels.\n"
-                "Your task is to extract all samples listed in the image into structured data.\n"
+                "You are a laboratory sample OCR and document extraction assistant. You analyze documents (multi-page PDFs or images) of sample intake sheets, invoices, or manifests.\n"
+                "Search across all pages in multi-page documents to locate the page with sample and test details. Ignore non-sample pages.\n"
+                "Your task is to extract all samples listed in the document into structured data.\n"
                 "Standardize material codes to: BROILER, PIG, FISH, RUMINANT, PET, SOYBEAN_MEAL, CORN, WHEAT, PREMIX, RAW_MATERIAL, or standard UPPERCASE material code.\n"
                 "Identify requested tests:\n"
                 "- test_total_aa (Total Amino Acids)\n"
@@ -192,7 +202,7 @@ class AIService:
             try:
                 response = client.models.generate_content(
                     model="gemini-flash-latest",
-                    contents=[image_part, "Extract all samples and requested tests from this image. Standardize all fields according to schema requirements."],
+                    contents=[doc_part, "Extract all samples and requested tests from this document. Standardize all fields according to schema requirements."],
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         response_schema=ExtractedBatch,
@@ -202,7 +212,7 @@ class AIService:
             except Exception:
                 response = client.models.generate_content(
                     model="gemini-2.0-flash",
-                    contents=[image_part, "Extract all samples and requested tests from this image. Standardize all fields according to schema requirements."],
+                    contents=[doc_part, "Extract all samples and requested tests from this document. Standardize all fields according to schema requirements."],
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         response_schema=ExtractedBatch,
