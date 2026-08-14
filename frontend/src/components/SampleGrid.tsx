@@ -37,6 +37,37 @@ const CheckboxHeader = (props: any) => {
   );
 };
 
+// Custom Header Component for String/Dropdown columns with Fill All button on a 2nd line below column title
+const FillAllStringHeader = (props: any) => {
+  const { displayName, field, rowData, setRowData } = props;
+
+  const handleFillAll = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!rowData || rowData.length === 0) return;
+    const topValue = rowData[0][field];
+    if (topValue === undefined) return;
+    setRowData((prev: any[]) => prev.map((row) => ({ ...row, [field]: topValue })));
+  };
+
+  return (
+    <div className="flex flex-col items-start justify-center w-full h-full py-0.5 select-none font-bold text-slate-200">
+      {/* Line 1: Un-covered Column Title */}
+      <span className="text-xs truncate w-full leading-tight">{displayName}</span>
+      
+      {/* Line 2: Fill All Button directly below column title */}
+      {rowData && rowData.length > 0 && (
+        <button
+          onClick={handleFillAll}
+          className="mt-1 px-1.5 py-0.5 rounded bg-brand-500/20 hover:bg-brand-500/50 text-brand-300 hover:text-white text-[10px] font-bold border border-brand-500/30 flex items-center gap-0.5 transition-all"
+          title={`Fill All: Copy row 1's "${rowData[0]?.[field] || ''}" to all rows`}
+        >
+          <span>Fill All ⬇</span>
+        </button>
+      )}
+    </div>
+  );
+};
+
 interface SampleGridProps {
   rowData: any[];
   setRowData: React.Dispatch<React.SetStateAction<any[]>>;
@@ -123,21 +154,24 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       cellClass: "text-slate-500 font-semibold text-center"
     },
     {
-      headerName: "Mac. no",
+      headerComponent: FillAllStringHeader,
+      headerComponentParams: { displayName: "Mac. no", field: "mac_no", rowData, setRowData },
       field: "mac_no",
       editable: true,
       flex: 1.2,
       cellClass: "font-semibold text-slate-800"
     },
     {
-      headerName: "Customer ID",
+      headerComponent: FillAllStringHeader,
+      headerComponentParams: { displayName: "Customer ID", field: "customer_name", rowData, setRowData },
       field: "customer_name",
       editable: true,
       flex: 1.5,
       cellClass: "font-medium"
     },
     {
-      headerName: "Material Code",
+      headerComponent: FillAllStringHeader,
+      headerComponentParams: { displayName: "Material Code", field: "material_code", rowData, setRowData },
       field: "material_code",
       editable: true,
       cellEditor: "agSelectCellEditor",
@@ -147,7 +181,8 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       flex: 1.2
     },
     {
-      headerName: "Sample Description",
+      headerComponent: FillAllStringHeader,
+      headerComponentParams: { displayName: "Sample Description", field: "sample_description", rowData, setRowData },
       field: "sample_description",
       editable: true,
       flex: 2
@@ -213,7 +248,8 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
       cellClass: "flex items-center justify-center"
     },
     {
-      headerName: "Contact Person",
+      headerComponent: FillAllStringHeader,
+      headerComponentParams: { displayName: "Contact Person", field: "contact_person", rowData, setRowData },
       field: "contact_person",
       editable: true,
       flex: 1.4,
@@ -308,6 +344,7 @@ export default function SampleGrid({ rowData, setRowData, validationErrors = [],
             rowData={rowData}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
+            headerHeight={52}
             rowSelection="multiple"
             suppressRowClickSelection={true}
             onCellKeyDown={onCellKeyDown}

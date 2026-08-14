@@ -140,13 +140,13 @@ class AIService:
             doc_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
 
             system_prompt = (
-                "You are an expert document OCR and laboratory manifest digitizer.\n"
-                "Analyze the uploaded document or image (which may be a multi-page PDF, printed sheet, or photo).\n"
-                "CRITICAL EXTRACTION RULES:\n"
-                "1. NO SHIPMENT NOISE: DO NOT include general logistics info (such as DHL/FedEx waybill numbers, package weight, courier details, or origin addresses). Omit these completely.\n"
-                "2. KEEP CUSTOMER INFO: Always extract and clearly list the Customer / Company Name and primary contact person.\n"
-                "3. LIST SAMPLES: Clearly list all sample IDs, sample codes, treatment numbers (e.g. T-1 to T-11), material types, and sample descriptions.\n"
-                "4. STRICT TEST DETECTION (NO GUESSING): Extract requested analytical tests ONLY if explicitly written in the document. If NO specific tests (e.g. Total AA, Supp AA, NIR, TRP, GAA, TDF) are explicitly specified, DO NOT guess or assume test panels. Instead, explicitly output: 'Requested Analysis: Not found in document - please specify tests manually.'"
+                "You are an expert document OCR and laboratory sample digitizer.\n"
+                "Analyze the uploaded document or image (which may be a filled ordersheet, custom outsource request, printed invoice, or multi-page shipping packet).\n"
+                "ESSENTIAL EXTRACTION RULES:\n"
+                "1. STRICT OMISSION OF LOGISTICS/SHIPPING NOISE: DO NOT include freight/waybill tracking numbers (e.g., FedEx/DHL AWB), package weights, tariff/NCM codes, declared currency values ($USD/EUR), tax invoice numbers (DANFE), or legal boilerplate. Omit them completely.\n"
+                "2. CUSTOMER & SUBMITTER: Extract and clearly state the Customer/Company Name, City/Country, and primary contact person.\n"
+                "3. ESSENTIAL SAMPLE DETAILS: Clearly list all samples, including sample IDs, batch numbers, material types (e.g. broiler feed, pig feed, soybean meal, corn, sorghum, wheat bran, powdered milk), animal species, growth phase, and unique sample descriptions.\n"
+                "4. REQUESTED ANALYTICAL TESTS: Extract requested tests ONLY if explicitly checked, marked (e.g., circled/crossed 'X'), or written in the document (e.g., Total AA, Supp AA, NIR, Tryptophan/Trp, GAA, Spore count, HPLC). If no tests are explicitly marked, state 'Requested Analysis: Not specified in document'."
             )
 
             try:
@@ -187,18 +187,13 @@ class AIService:
             doc_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
 
             system_prompt = (
-                "You are a laboratory sample OCR and document extraction assistant. You analyze documents (multi-page PDFs or images) of sample intake sheets, invoices, or manifests.\n"
-                "Search across all pages in multi-page documents to locate the page with sample and test details. Ignore non-sample pages.\n"
-                "Your task is to extract all samples listed in the document into structured data.\n"
-                "Standardize material codes to: BROILER, PIG, FISH, RUMINANT, PET, SOYBEAN_MEAL, CORN, WHEAT, PREMIX, RAW_MATERIAL, or standard UPPERCASE material code.\n"
-                "Identify requested tests:\n"
-                "- test_total_aa (Total Amino Acids)\n"
-                "- test_supp_aa (Supplemental Amino Acids)\n"
-                "- test_nir (NIR)\n"
-                "- test_trp (Tryptophan / Trp)\n"
-                "- test_gaa (GAA)\n"
-                "- test_tdf (Total Dietary Fiber / TDF)\n"
-                "Ensure that you extract the Customer/Submitter Name if visible on the sheet."
+                "You are an expert laboratory sample digitizer and OCR assistant. You analyze documents (multi-page PDFs or images) of sample intake sheets, custom outsource requests, invoices, or manifests.\n"
+                "Search across all pages in multi-page documents to locate the page(s) with sample and test details. Ignore non-sample shipping pages, waybills, customs tax declarations, declared values, and tracking labels.\n"
+                "Extract all essential samples into structured JSON data.\n"
+                "1. CUSTOMER: Extract company/submitter name.\n"
+                "2. MATERIAL CODES: Standardize material codes to BROILER, PIG, FISH, RUMINANT, PET, SOYBEAN_MEAL, CORN, WHEAT, PREMIX, RAW_MATERIAL, or standard UPPERCASE material code.\n"
+                "3. SAMPLES: Create individual sample items with unique descriptions, variety, batch numbers, or animal types.\n"
+                "4. REQUESTED TESTS: Identify explicit test selections (test_total_aa, test_supp_aa, test_nir, test_trp, test_gaa, test_tdf)."
             )
 
             try:
